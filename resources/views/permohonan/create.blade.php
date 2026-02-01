@@ -8,17 +8,17 @@
     <p class="text-muted">Isi formulir di bawah untuk mengajukan permohonan reklame</p>
 </div>
 
-<div class="row">
+<div class="row g-5">
     <div class="col-lg-8">
-        <div class="card">
-            <div class="card-body p-4">
+        <div class="card h-100">
+            <div class="card-body p-5">
                 <form method="POST" action="{{ route('permohonan.store') }}" enctype="multipart/form-data">
                     @csrf
 
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-person"></i> Data Pemohon</h5>
+                    <h5 class="mb-4 pb-3 border-bottom" style="color: #1a5490;"><i class="bi bi-person"></i> Data Pemohon</h5>
                     
-                    <div class="mb-3">
-                        <label for="nama_pemohon" class="form-label">Nama Pemohon <span class="text-danger">*</span></label>
+                    <div class="mb-4">
+                        <label for="nama_pemohon" class="form-label fw-600">Nama Pemohon <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('nama_pemohon') is-invalid @enderror" 
                             id="nama_pemohon" name="nama_pemohon" value="{{ old('nama_pemohon') }}" required>
                         @error('nama_pemohon')
@@ -26,8 +26,8 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label for="alamat_pemohon" class="form-label">Alamat <span class="text-danger">*</span></label>
+                    <div class="mb-4">
+                        <label for="alamat_pemohon" class="form-label fw-600">Alamat <span class="text-danger">*</span></label>
                         <textarea class="form-control @error('alamat_pemohon') is-invalid @enderror" 
                             id="alamat_pemohon" name="alamat_pemohon" rows="3" required>{{ old('alamat_pemohon') }}</textarea>
                         @error('alamat_pemohon')
@@ -36,16 +36,16 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nomor_telepon" class="form-label">Nomor Telepon <span class="text-danger">*</span></label>
+                        <div class="col-md-6 mb-4">
+                            <label for="nomor_telepon" class="form-label fw-600">Nomor Telepon <span class="text-danger">*</span></label>
                             <input type="tel" class="form-control @error('nomor_telepon') is-invalid @enderror" 
                                 id="nomor_telepon" name="nomor_telepon" value="{{ old('nomor_telepon') }}" required>
                             @error('nomor_telepon')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="nik" class="form-label">NIK (16 digit) <span class="text-danger">*</span></label>
+                        <div class="col-md-6 mb-4">
+                            <label for="nik" class="form-label fw-600">NIK (16 digit) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nik') is-invalid @enderror" 
                                 id="nik" name="nik" value="{{ old('nik') }}" placeholder="1234567890123456" required>
                             @error('nik')
@@ -54,8 +54,8 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="npwp" class="form-label">NPWP (Opsional)</label>
+                    <div class="mb-4">
+                        <label for="npwp" class="form-label fw-600">NPWP (Opsional)</label>
                         <input type="text" class="form-control @error('npwp') is-invalid @enderror" 
                             id="npwp" name="npwp" value="{{ old('npwp') }}">
                         @error('npwp')
@@ -63,13 +63,13 @@
                         @enderror
                     </div>
 
-                    <hr>
+                    <hr class="my-5">
                     
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-signpost-split"></i> Data Reklame</h5>
+                    <h5 class="mb-4 pb-3 border-bottom" style="color: #1a5490;"><i class="bi bi-signpost-split"></i> Data Reklame</h5>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="jenis_reklame" class="form-label">Jenis Reklame <span class="text-danger">*</span></label>
+                        <div class="col-md-6 mb-4">
+                            <label for="jenis_reklame" class="form-label fw-600">Jenis Reklame <span class="text-danger">*</span></label>
                             <select class="form-select @error('jenis_reklame') is-invalid @enderror" 
                                 id="jenis_reklame" name="jenis_reklame" required>
                                 <option value="">-- Pilih --</option>
@@ -80,8 +80,8 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="jumlah_reklame" class="form-label">Jumlah Reklame <span class="text-danger">*</span></label>
+                        <div class="col-md-6 mb-4">
+                            <label for="jumlah_reklame" class="form-label fw-600">Jumlah Reklame <span class="text-danger">*</span></label>
                             <input type="number" class="form-control @error('jumlah_reklame') is-invalid @enderror" 
                                 id="jumlah_reklame" name="jumlah_reklame" value="{{ old('jumlah_reklame', 1) }}" min="1" required>
                             @error('jumlah_reklame')
@@ -90,8 +90,8 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="ukuran_reklame" class="form-label">Ukuran Reklame <span class="text-danger">*</span></label>
+                    <div class="mb-4">
+                        <label for="ukuran_reklame" class="form-label fw-600">Ukuran Reklame <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('ukuran_reklame') is-invalid @enderror" 
                             id="ukuran_reklame" name="ukuran_reklame" placeholder="Contoh: 3m x 5m" 
                             value="{{ old('ukuran_reklame') }}" required>
@@ -100,8 +100,8 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label for="narasi_reklame" class="form-label">Narasi/Deskripsi Reklame <span class="text-danger">*</span></label>
+                    <div class="mb-4">
+                        <label for="narasi_reklame" class="form-label fw-600">Narasi/Deskripsi Reklame <span class="text-danger">*</span></label>
                         <textarea class="form-control @error('narasi_reklame') is-invalid @enderror" 
                             id="narasi_reklame" name="narasi_reklame" rows="3" required>{{ old('narasi_reklame') }}</textarea>
                         @error('narasi_reklame')
@@ -109,8 +109,8 @@
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label for="lokasi_pemasangan" class="form-label">Lokasi Pemasangan <span class="text-danger">*</span></label>
+                    <div class="mb-4">
+                        <label for="lokasi_pemasangan" class="form-label fw-600">Lokasi Pemasangan <span class="text-danger">*</span></label>
                         <textarea class="form-control @error('lokasi_pemasangan') is-invalid @enderror" 
                             id="lokasi_pemasangan" name="lokasi_pemasangan" rows="3" required>{{ old('lokasi_pemasangan') }}</textarea>
                         @error('lokasi_pemasangan')
@@ -118,22 +118,22 @@
                         @enderror
                     </div>
 
-                    <hr>
+                    <hr class="my-5">
 
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-geo-alt"></i> Koordinat Lokasi</h5>
+                    <h5 class="mb-4 pb-3 border-bottom" style="color: #1a5490;"><i class="bi bi-geo-alt"></i> Koordinat Lokasi</h5>
 
-                    <div class="mb-3">
-                        <label for="searchAddress" class="form-label">Cari Alamat <span class="text-danger">*</span></label>
-                        <div class="input-group">
+                    <div class="mb-4">
+                        <label for="searchAddress" class="form-label fw-600">Cari Alamat <span class="text-danger">*</span></label>
+                        <div class="input-group mb-2">
                             <input type="text" class="form-control" id="searchAddress" placeholder="Ketik alamat lengkap (contoh: Jl. Sudirman No. 10, Jakarta Pusat)" value="{{ old('lokasi_pemasangan') }}">
                             <button class="btn btn-primary" type="button" id="searchBtn"><i class="bi bi-search"></i> Cari</button>
                         </div>
-                        <small class="text-muted d-block mt-2">
-                            <i class="bi bi-lightbulb"></i> Ketikkan alamat lengkap lokasi reklame, kemudian klik "Cari" untuk menemukan koordinatnya di peta.
+                        <small class="text-muted d-block">
+                            <i class="bi bi-lightbulb"></i> Tips: Ketikkan alamat lengkap dengan nama jalan, nomor, dan kota untuk hasil yang lebih akurat. Atau klik langsung pada peta untuk menandai lokasi.
                         </small>
                     </div>
 
-                    <div id="mapContainer" style="height: 300px; border-radius: 4px; margin-bottom: 1rem; border: 1px solid #ddd;"></div>
+                    <div id="mapContainer" style="height: 400px; border-radius: 4px; margin-bottom: 2rem; border: 2px solid #dee2e6; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);"></div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -141,6 +141,7 @@
                             <input type="number" class="form-control @error('latitude') is-invalid @enderror" 
                                 id="latitude" name="latitude" step="0.0000001" placeholder="-6.200000" 
                                 value="{{ old('latitude') }}" required>
+                            <small class="text-muted d-block mt-1">Format: -6.123456 (negativ untuk Selatan)</small>
                             @error('latitude')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -150,50 +151,20 @@
                             <input type="number" class="form-control @error('longitude') is-invalid @enderror" 
                                 id="longitude" name="longitude" step="0.0000001" placeholder="106.816666" 
                                 value="{{ old('longitude') }}" required>
+                            <small class="text-muted d-block mt-1">Format: 106.123456 (positif untuk Timur)</small>
                             @error('longitude')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
 
-                    <small class="text-muted d-block mb-3">
-                        <i class="bi bi-lightbulb"></i> Klik pada peta untuk menandai lokasi reklame, atau masukkan koordinat secara manual.
+                    <small class="text-muted d-block mb-4 p-2 bg-light border-start border-primary ps-3">
+                        <i class="bi bi-info-circle"></i> <strong>Cara menggunakan:</strong> Cari alamat atau klik langsung pada peta untuk menandai lokasi reklame. Koordinat akan terupdate otomatis.
                     </small>
 
-                    <hr>
+                    <hr class="my-5">
 
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-file-earmark"></i> Dokumen</h5>
-
-                    <div class="mb-3">
-                        <label for="file_ktp" class="form-label">Scan KTP (PDF/JPG/PNG, max 5MB)</label>
-                        <input type="file" class="form-control @error('file_ktp') is-invalid @enderror" 
-                            id="file_ktp" name="file_ktp" accept=".pdf,.jpg,.jpeg,.png">
-                        @error('file_ktp')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="file_npwp" class="form-label">Scan NPWP (PDF/JPG/PNG, max 5MB)</label>
-                        <input type="file" class="form-control @error('file_npwp') is-invalid @enderror" 
-                            id="file_npwp" name="file_npwp" accept=".pdf,.jpg,.jpeg,.png">
-                        @error('file_npwp')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="file_desain" class="form-label">Desain Reklame (PDF/JPG/PNG, max 5MB)</label>
-                        <input type="file" class="form-control @error('file_desain') is-invalid @enderror" 
-                            id="file_desain" name="file_desain" accept=".pdf,.jpg,.jpeg,.png">
-                        @error('file_desain')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <hr>
-
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-file-earmark-check"></i> Persyaratan Dokumen</h5>
+                    <h5 class="mb-4 pb-3 border-bottom" style="color: #1a5490;"><i class="bi bi-file-earmark-check"></i> Persyaratan Dokumen</h5>
 
                     <p class="small text-muted mb-4">
                         <i class="bi bi-info-circle"></i> Upload dokumen pendukung di bawah ini. 
@@ -268,19 +239,19 @@
     </div>
 
     <div class="col-lg-4">
-        <div class="card bg-light">
-            <div class="card-body">
-                <h5 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h5>
-                <p class="small text-muted mb-3">Pastikan semua data yang Anda isi sudah benar sebelum mengajukan permohonan.</p>
+        <div class="card bg-light h-100 sticky-top" style="top: 20px;">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-3"><i class="bi bi-info-circle"></i> Informasi</h5>
+                <p class="small text-muted mb-4">Pastikan semua data yang Anda isi sudah benar sebelum mengajukan permohonan.</p>
                 
                 <h6 class="small mb-2"><strong>Dokumen yang diperlukan:</strong></h6>
-                <ul class="small text-muted">
+                <ul class="small text-muted ps-3 mb-4">
                     <li>Fotocopy KTP berwarna</li>
                     <li>Fotocopy NPWP (jika ada)</li>
                     <li>Desain reklame</li>
                 </ul>
 
-                <p class="small text-muted mt-3">Permohonan dalam status <strong>Draft</strong> dapat diubah atau dihapus kapan saja. Setelah diajukan, permohonan tidak dapat diubah.</p>
+                <p class="small text-muted mt-4 pt-3 border-top">Permohonan dalam status <strong>Draft</strong> dapat diubah atau dihapus kapan saja. Setelah diajukan, permohonan tidak dapat diubah.</p>
             </div>
         </div>
     </div>
@@ -293,6 +264,51 @@
     #mapContainer {
         position: relative;
         z-index: 1;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card.bg-light {
+        background-color: #f8f9fa !important;
+    }
+    
+    hr {
+        border-top: 1px solid #dee2e6;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-label {
+        margin-bottom: 0.6rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-control,
+    .form-select {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1a5490;
+        box-shadow: 0 0 0 0.2rem rgba(26, 84, 144, 0.25);
+    }
+    
+    @media (max-width: 991.98px) {
+        .card.bg-light {
+            margin-top: 2rem;
+        }
+        
+        .sticky-top {
+            position: static !important;
+        }
     }
 </style>
 @endpush
@@ -363,12 +379,30 @@
         }
     });
 
-    // Geocoding dengan Nominatim API
+    // Function to show alert
+    function showAlert(message, type = 'danger') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        const formCardBody = document.querySelector('.card-body');
+        const firstHr = formCardBody.querySelector('hr');
+        if (firstHr) {
+            formCardBody.insertBefore(alertDiv, firstHr);
+        } else {
+            formCardBody.insertBefore(alertDiv, formCardBody.firstChild);
+        }
+        setTimeout(() => alertDiv.remove(), 6000);
+    }
+
+    // Geocoding dengan Nominatim API (improved error handling)
     document.getElementById('searchBtn').addEventListener('click', function() {
         const address = document.getElementById('searchAddress').value.trim();
         
         if (!address) {
-            alert('Silakan masukkan alamat terlebih dahulu');
+            showAlert('Silakan masukkan alamat terlebih dahulu');
             return;
         }
 
@@ -378,19 +412,38 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mencari...';
 
-        // Call Nominatim API
-        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`, {
+        // Call Nominatim API with better error handling
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&countrycodes=id`, {
+            method: 'GET',
+            signal: controller.signal,
             headers: {
                 'Accept': 'application/json',
-                'User-Agent': 'ReklameApp'
+                'User-Agent': 'ReklameApp/1.0'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.length > 0) {
+            if (data && data.length > 0) {
                 const result = data[0];
                 const lat = parseFloat(result.lat);
                 const lng = parseFloat(result.lon);
+
+                // Validate coordinates for Indonesia region (approximately)
+                if ((lat < -11 || lat > 6) || (lng < 95 || lng > 141)) {
+                    showAlert('Lokasi yang ditemukan berada di luar wilayah Indonesia. Silakan coba alamat yang lebih spesifik.', 'warning');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    return;
+                }
 
                 // Update form inputs
                 document.getElementById('latitude').value = lat.toFixed(8);
@@ -405,22 +458,21 @@
                 }
                 map.setView([lat, lng], 15);
 
-                // Tampilkan notifikasi
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    <i class="bi bi-check-circle"></i> Lokasi ditemukan: <strong>${result.display_name}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('h5'));
-                setTimeout(() => alertDiv.remove(), 5000);
+                // Tampilkan notifikasi sukses
+                showAlert(`<strong>Lokasi ditemukan:</strong> ${result.display_name}`, 'success');
             } else {
-                alert('Alamat tidak ditemukan. Silakan coba alamat yang lebih spesifik atau manual pin lokasi di peta.');
+                showAlert('Alamat tidak ditemukan. Silakan coba alamat yang lebih spesifik atau manual pin lokasi di peta.', 'warning');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat mencari alamat. Silakan coba lagi.');
+            clearTimeout(timeoutId);
+            console.error('Geocoding error:', error);
+            
+            if (error.name === 'AbortError') {
+                showAlert('Pencarian alamat timeout. Silakan coba lagi atau pin lokasi secara manual di peta.', 'warning');
+            } else {
+                showAlert('Terjadi kesalahan saat mencari alamat. Silakan coba lagi atau pin lokasi secara manual di peta dengan mengklik pada peta.', 'warning');
+            }
         })
         .finally(() => {
             btn.disabled = false;

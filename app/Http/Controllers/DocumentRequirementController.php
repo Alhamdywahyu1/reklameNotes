@@ -41,52 +41,84 @@ class DocumentRequirementController extends Controller
             abort(403, 'Anda tidak memiliki akses ke permohonan ini');
         }
 
+        // Debug: Log all files received
+        \Log::info('Documents received:', [
+            'has_documents' => $request->has('documents'),
+            'all_files' => $request->allFiles(),
+            'documents_data' => $request->input('documents'),
+        ]);
+
         $validated = $request->validate([
             'documents' => 'required|array',
-            'documents.*.file' => 'nullable|file|max:5120',
+            'documents.*.file' => 'nullable|file|max:5120|mimes:pdf,jpg,jpeg,png',
             'documents.*.id' => 'required|exists:persyaratan_dokumen,id',
         ]);
 
         $uploadedCount = 0;
+        $errors = [];
 
-        foreach ($validated['documents'] as $doc) {
+        // Get files separately since they might not be in validated array
+        $files = $request->file('documents', []);
+
+        foreach ($validated['documents'] as $index => $doc) {
             $requirement = DocumentRequirement::find($doc['id']);
 
             // Cek otorisasi
-            if ($requirement->permohonan_id !== $permohonan->id) {
+            if (!$requirement || $requirement->permohonan_id !== $permohonan->id) {
                 continue;
             }
 
-            if (isset($doc['file'])) {
+            // Check if file exists for this index
+            $file = $files[$index]['file'] ?? null;
+            
+            if ($file && $file->isValid()) {
                 try {
                     // Validasi file
-                    $this->fileValidationService->validateFile($doc['file']);
+                    $validationErrors = $this->fileValidationService::validateFile($file);
+                    if (!empty($validationErrors)) {
+                        $errors[] = "{$requirement->jenis_persyaratan}: " . implode(', ', $validationErrors);
+                        continue;
+                    }
                     
                     // Hapus file lama jika ada
                     if ($requirement->file_dokumen && Storage::disk('private')->exists($requirement->file_dokumen)) {
                         Storage::disk('private')->delete($requirement->file_dokumen);
                     }
 
-                    $filePath = $doc['file']->store('documents/' . $permohonan->id, 'private');
-                    $requirement->update([
-                        'file_dokumen' => $filePath,
-                        'status' => 'Belum Lengkap',
-                    ]);
-
-                    $uploadedCount++;
+                    $filePath = $file->store('documents/' . $permohonan->id, 'private');
+                    
+                    if ($filePath) {
+                        $requirement->update([
+                            'file_dokumen' => $filePath,
+                            'status' => 'Belum Lengkap',
+                        ]);
+                        $uploadedCount++;
+                        
+                        \Log::info("File uploaded successfully", [
+                            'requirement_id' => $requirement->id,
+                            'file_path' => $filePath
+                        ]);
+                    } else {
+                        $errors[] = "Gagal menyimpan file untuk {$requirement->jenis_persyaratan}";
+                    }
                 } catch (\Exception $e) {
-                    return redirect()->back()
-                        ->withInput()
-                        ->with('error', 'Error uploading ' . $requirement->jenis_persyaratan . ': ' . $e->getMessage());
+                    \Log::error("File upload error: " . $e->getMessage());
+                    $errors[] = "Error uploading {$requirement->jenis_persyaratan}: " . $e->getMessage();
                 }
             }
         }
 
+        if (!empty($errors)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', implode(', ', $errors));
+        }
+
         $message = $uploadedCount > 0 
             ? "{$uploadedCount} dokumen berhasil diunggah"
-            : 'Tidak ada dokumen yang diupload';
+            : 'Tidak ada dokumen yang diupload. Pastikan Anda memilih file untuk diupload.';
 
-        return redirect()->back()->with('success', $message);
+        return redirect()->back()->with($uploadedCount > 0 ? 'success' : 'warning', $message);
     }
 
     /**
@@ -95,7 +127,7 @@ class DocumentRequirementController extends Controller
     public function viewForStaff(PermohonanReklame $permohonan): View
     {
         // Cek otorisasi hanya untuk staff
-        if (!auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang'])) {
+        if (!auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
             abort(403, 'Hanya staff yang dapat mengakses halaman ini');
         }
 
@@ -109,17 +141,70 @@ class DocumentRequirementController extends Controller
      */
     public function download(DocumentRequirement $requirement)
     {
-        // Cek otorisasi
+        // Cek otorisasi - pemohon atau semua staff
         $permohonan = $requirement->permohonan;
-        if ($permohonan->user_id !== auth()->id() && !auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang'])) {
+        $isOwner = $permohonan->user_id === auth()->id();
+        $isStaff = auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin']);
+        
+        if (!$isOwner && !$isStaff) {
             abort(403, 'Anda tidak memiliki akses');
         }
 
-        if (!$requirement->file_dokumen || !Storage::disk('private')->exists($requirement->file_dokumen)) {
-            abort(404, 'File tidak ditemukan');
+        if (!$requirement->file_dokumen) {
+            abort(404, 'File belum diupload');
+        }
+        
+        if (!Storage::disk('private')->exists($requirement->file_dokumen)) {
+            abort(404, 'File tidak ditemukan di server');
         }
 
         return Storage::disk('private')->download($requirement->file_dokumen);
+    }
+
+    /**
+     * Preview file dokumen (untuk gambar).
+     */
+    public function preview(DocumentRequirement $requirement)
+    {
+        // Cek otorisasi - pemohon atau semua staff
+        $permohonan = $requirement->permohonan;
+        $isOwner = $permohonan->user_id === auth()->id();
+        $isStaff = auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin']);
+        
+        if (!$isOwner && !$isStaff) {
+            abort(403, 'Anda tidak memiliki akses');
+        }
+
+        if (!$requirement->file_dokumen) {
+            abort(404, 'File belum diupload');
+        }
+        
+        if (!Storage::disk('private')->exists($requirement->file_dokumen)) {
+            abort(404, 'File tidak ditemukan di server');
+        }
+
+        $filePath = $requirement->file_dokumen;
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        
+        // Hanya izinkan preview untuk file gambar
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        if (!in_array($extension, $allowedExtensions)) {
+            abort(400, 'Preview hanya tersedia untuk file gambar');
+        }
+
+        $mimeTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+        ];
+
+        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+
+        return response(Storage::disk('private')->get($filePath))
+            ->header('Content-Type', $mimeType)
+            ->header('Cache-Control', 'private, max-age=3600');
     }
 
     /**
@@ -128,7 +213,7 @@ class DocumentRequirementController extends Controller
     public function updateStatus(Request $request, DocumentRequirement $requirement): RedirectResponse
     {
         // Cek otorisasi hanya untuk staff
-        if (!auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang'])) {
+        if (!auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
             abort(403, 'Hanya staff yang dapat mengakses halaman ini');
         }
 
@@ -170,7 +255,10 @@ class DocumentRequirementController extends Controller
         $permohonan = $requirement->permohonan;
 
         // Cek otorisasi
-        if ($permohonan->user_id !== auth()->id() && !auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang'])) {
+        $isOwner = $permohonan->user_id === auth()->id();
+        $isStaff = auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin']);
+        
+        if (!$isOwner && !$isStaff) {
             abort(403, 'Anda tidak memiliki akses');
         }
 

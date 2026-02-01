@@ -89,9 +89,14 @@
                                 <td>{{ Str::limit($item->lokasi_pemasangan, 25) }}</td>
                                 <td>{{ $item->created_at->format('d M Y') }}</td>
                                 <td>
-                                    <a href="{{ route('approval.approve-bidang', $item) }}" class="btn btn-sm btn-success">
-                                        <i class="bi bi-check-circle"></i> Final Approval
-                                    </a>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-info" title="Periksa Dokumen">
+                                            <i class="bi bi-file-earmark-check"></i>
+                                        </a>
+                                        <a href="{{ route('approval.approve-bidang', $item) }}" class="btn btn-success" title="Final Approval">
+                                            <i class="bi bi-check-circle"></i>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

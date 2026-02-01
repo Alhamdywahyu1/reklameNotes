@@ -15,6 +15,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PermohonanReklameController extends Controller
 {
+    public function __construct(private FileValidationService $fileValidationService)
+    {
+    }
+
     /**
      * Display a listing of user's permohonan.
      */
@@ -60,15 +64,23 @@ class PermohonanReklameController extends Controller
             'requirement_files.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        // Cek apakah sudah ada permohonan pending/submitted dengan NIK yang sama
-        $existingPermohonan = PermohonanReklame::where('nik', $validated['nik'])
-            ->whereIn('status', ['Draft', 'Diajukan', 'Diverifikasi Operator', 'Disetujui Kepala Seksi'])
-            ->first();
+        // Cek apakah sudah ada 3 permohonan aktif dengan NIK yang sama
+        $activeStatuses = ['Draft', 'Diajukan', 'Diverifikasi Operator', 'Disetujui Kepala Seksi'];
+        $activePermohonanCount = PermohonanReklame::where('nik', $validated['nik'])
+            ->whereIn('status', $activeStatuses)
+            ->count();
         
-        if ($existingPermohonan) {
+        $maxActivePermohonan = 3; // Maksimal 3 permohonan aktif per NIK
+        
+        if ($activePermohonanCount >= $maxActivePermohonan) {
+            $existingRegistrations = PermohonanReklame::where('nik', $validated['nik'])
+                ->whereIn('status', $activeStatuses)
+                ->pluck('nomor_registrasi')
+                ->implode(', ');
+            
             return redirect()->back()
                 ->withInput()
-                ->with('error', "Anda sudah memiliki permohonan dengan NIK ini yang masih dalam proses ({$existingPermohonan->nomor_registrasi}). Silakan menunggu hingga permohonan selesai atau ditolak sebelum mengajukan yang baru.");
+                ->with('error', "Anda sudah memiliki {$maxActivePermohonan} permohonan aktif dengan NIK ini ({$existingRegistrations}). Silakan menunggu hingga salah satu permohonan selesai atau ditolak sebelum mengajukan yang baru.");
         }
 
         // Validate files strictly
@@ -143,15 +155,21 @@ class PermohonanReklameController extends Controller
             $persyaratanDocs = $permohonan->documentRequirements()->get();
             
             foreach ($requirementFiles as $index => $file) {
-                if ($file !== null && isset($persyaratanDocs[$index])) {
+                if ($file !== null && $file->isValid() && isset($persyaratanDocs[$index])) {
                     try {
-                        $this->fileValidationService->validateFile($file);
+                        $validationErrors = FileValidationService::validateFile($file);
+                        if (!empty($validationErrors)) {
+                            \Log::warning("File validation failed: " . implode(', ', $validationErrors));
+                            continue;
+                        }
                         
                         $filePath = $file->store('documents/' . $permohonan->id, 'private');
-                        $persyaratanDocs[$index]->update([
-                            'file_dokumen' => $filePath,
-                            'status' => 'Belum Lengkap',
-                        ]);
+                        if ($filePath) {
+                            $persyaratanDocs[$index]->update([
+                                'file_dokumen' => $filePath,
+                                'status' => 'Belum Lengkap',
+                            ]);
+                        }
                     } catch (\Exception $e) {
                         // Log but don't stop the process
                         \Log::warning("Error uploading requirement file: " . $e->getMessage());

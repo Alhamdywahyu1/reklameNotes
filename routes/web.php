@@ -96,8 +96,11 @@ Route::middleware('auth')->group(function () {
         Route::get('print/{permohonan}/pdf', [PrintController::class, 'generatePdf'])->name('print.pdf');
     });
 
-    // Print surat - accessible to both pemohon (if approved) and operator
-    Route::get('print/{permohonan}/surat', [PrintController::class, 'printSurat'])->name('print.surat');
+    // Print surat - accessible to operator and admin only
+    Route::middleware('role:operator,admin')->group(function () {
+        Route::get('print/{permohonan}/surat', [PrintController::class, 'printSurat'])->name('print.surat');
+        Route::post('print/{permohonan}/track-surat', [PrintController::class, 'trackPrintSurat'])->name('print.track-surat');
+    });
 
     // Notification routes
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -117,12 +120,13 @@ Route::middleware('auth')->group(function () {
         Route::post('permohonan/{permohonan}/requirements/store-multiple', [DocumentRequirementController::class, 'storeMultiple'])->name('document-requirements.store-multiple');
     });
 
-    Route::middleware('role:operator,kepala_seksi,kepala_bidang')->group(function () {
+    Route::middleware('role:operator,kepala_seksi,kepala_bidang,admin')->group(function () {
         Route::get('permohonan/{permohonan}/requirements/check', [DocumentRequirementController::class, 'viewForStaff'])->name('document-requirements.check');
         Route::patch('requirements/{requirement}/status', [DocumentRequirementController::class, 'updateStatus'])->name('document-requirements.update-status');
     });
 
     Route::get('requirements/{requirement}/download', [DocumentRequirementController::class, 'download'])->name('document-requirements.download');
+    Route::get('requirements/{requirement}/preview', [DocumentRequirementController::class, 'preview'])->name('document-requirements.preview');
     Route::delete('requirements/{requirement}', [DocumentRequirementController::class, 'destroy'])->name('document-requirements.destroy');
 
     // Verify email

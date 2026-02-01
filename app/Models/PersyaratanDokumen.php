@@ -18,6 +18,8 @@ class PersyaratanDokumen extends Model
         'is_lengkap',
         'file_dokumen',
         'keterangan',
+        'status',
+        'catatan_penolakan',
     ];
 
     protected function casts(): array

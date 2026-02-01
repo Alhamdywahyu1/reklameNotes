@@ -33,8 +33,8 @@
     <div class="col-lg-10 mx-auto">
         @if ($notifications->count() > 0)
             @foreach ($notifications as $notification)
-                <div class="card mb-3 border-left-{{ $notification->type === 'PENGAJUAN_BARU' ? 'warning' : ($notification->type === 'PERMOHONAN_DITOLAK' ? 'danger' : 'success') }}" 
-                     style="border-left: 4px solid {{ $notification->type === 'PENGAJUAN_BARU' ? '#ffc107' : ($notification->type === 'PERMOHONAN_DITOLAK' ? '#dc3545' : '#28a745') }}">
+                <div class="card mb-3 border-left-{{ $notification->type === 'PENGAJUAN_BARU' ? 'warning' : ($notification->type === 'PERMOHONAN_DITOLAK' ? 'danger' : ($notification->type === 'SURAT_DIPRINT' ? 'info' : 'success')) }}" 
+                     style="border-left: 4px solid {{ $notification->type === 'PENGAJUAN_BARU' ? '#ffc107' : ($notification->type === 'PERMOHONAN_DITOLAK' ? '#dc3545' : ($notification->type === 'SURAT_DIPRINT' ? '#0d6efd' : '#28a745')) }}">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
@@ -46,6 +46,10 @@
                                     @elseif ($notification->type === 'PERMOHONAN_DITOLAK')
                                         <span class="badge bg-danger me-2">
                                             <i class="bi bi-x-circle"></i> Ditolak
+                                        </span>
+                                    @elseif ($notification->type === 'SURAT_DIPRINT')
+                                        <span class="badge bg-info me-2">
+                                            <i class="bi bi-printer"></i> Surat Siap
                                         </span>
                                     @else
                                         <span class="badge bg-success me-2">
@@ -122,6 +126,10 @@
     
     .border-left-success {
         border-left: 4px solid #28a745 !important;
+    }
+
+    .border-left-info {
+        border-left: 4px solid #0d6efd !important;
     }
 </style>
 @endsection

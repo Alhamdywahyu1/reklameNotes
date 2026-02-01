@@ -10,7 +10,7 @@
             <p class="text-muted">{{ $permohonan->nomor_registrasi }}</p>
         </div>
         <div class="col-md-4 text-end">
-            <button onclick="window.print()" class="btn btn-primary">
+            <button onclick="printAndTrack()" class="btn btn-primary">
                 <i class="bi bi-printer"></i> Cetak Surat
             </button>
             <a href="{{ route('approval.dashboard') }}" class="btn btn-secondary">
@@ -190,4 +190,39 @@
         }
     }
 </style>
+
+<script>
+    function printAndTrack() {
+        // Trigger print
+        window.print();
+        
+        // Send tracking request to backend after a short delay
+        setTimeout(() => {
+            fetch('{{ route("print.track-surat", $permohonan) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-4';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `
+                    <i class="bi bi-check-circle"></i>
+                    <strong>Berhasil!</strong> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.querySelector('.alert-success').parentNode.insertBefore(alertDiv, document.querySelector('.alert-success'));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengirim notifikasi. Silakan hubungi administrator.');
+            });
+        }, 1000);
+    }
+</script>
 @endsection

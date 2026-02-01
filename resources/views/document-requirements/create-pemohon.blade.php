@@ -10,7 +10,33 @@
 
 @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
+        <i class="bi bi-check-circle"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if (session('warning'))
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle"></i> {{ session('warning') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+@if ($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> <strong>Terjadi kesalahan:</strong>
+        <ul class="mb-0 mt-2">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
@@ -43,15 +69,28 @@
                                                     <p class="small text-muted mb-3">{{ $req->keterangan }}</p>
 
                                         @php
-                                            $statusClass = match($req->status ?? 'Belum Lengkap') {
-                                                'Lengkap' => 'badge bg-success',
-                                                'Ditolak' => 'badge bg-danger',
-                                                default => 'badge bg-warning text-dark'
-                                            };
+                                            // Logika status:
+                                            // - Lengkap: sudah diverifikasi dan disetujui
+                                            // - Ditolak: sudah diverifikasi dan ditolak
+                                            // - Dalam Peninjauan: file sudah ada tapi belum dicheck
+                                            // - Belum Lengkap: file belum diupload
+                                            if ($req->status === 'Lengkap') {
+                                                $displayStatus = 'Lengkap';
+                                                $statusClass = 'badge bg-success';
+                                            } elseif ($req->status === 'Ditolak') {
+                                                $displayStatus = 'Ditolak';
+                                                $statusClass = 'badge bg-danger';
+                                            } elseif ($req->file_dokumen) {
+                                                $displayStatus = 'Dalam Peninjauan';
+                                                $statusClass = 'badge bg-info';
+                                            } else {
+                                                $displayStatus = 'Belum Lengkap';
+                                                $statusClass = 'badge bg-warning text-dark';
+                                            }
                                         @endphp
                                         <div class="mb-3">
                                             <small class="text-muted">Status:</small>
-                                            <span class="{{ $statusClass }}">{{ $req->status }}</span>
+                                            <span class="{{ $statusClass }}">{{ $displayStatus }}</span>
                                         </div>
 
                                         @if($req->status === 'Ditolak' && $req->catatan_penolakan)
@@ -71,10 +110,22 @@
                                             @enderror
 
                                             @if($req->file_dokumen)
-                                                <div class="mt-2">
-                                                    <a href="{{ route('document-requirements.download', $req) }}" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-download"></i> Download File Lama
-                                                    </a>
+                                                @php
+                                                    $extension = strtolower(pathinfo($req->file_dokumen, PATHINFO_EXTENSION));
+                                                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif']);
+                                                @endphp
+                                                <div class="mt-2 p-2 bg-light rounded border">
+                                                    <small class="text-muted d-block mb-2"><i class="bi bi-paperclip"></i> File yang sudah diupload:</small>
+                                                    <div class="btn-group btn-group-sm">
+                                                        @if($isImage)
+                                                            <a href="{{ route('document-requirements.preview', $req) }}" class="btn btn-outline-info" title="Lihat file" target="_blank">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                        <a href="{{ route('document-requirements.download', $req) }}" class="btn btn-outline-primary" title="Download file">
+                                                            <i class="bi bi-download"></i> Download
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             @endif
                                         </div>

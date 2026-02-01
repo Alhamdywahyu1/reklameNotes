@@ -2,6 +2,47 @@
 
 @section('title', 'Dashboard Operator')
 
+@push('styles')
+<style>
+    /* Fix Tab Button Visibility */
+    .nav-tabs .nav-link {
+        color: #374151 !important;
+        font-weight: 600;
+        background-color: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        margin-right: 4px;
+        border-radius: 8px 8px 0 0;
+        padding: 0.75rem 1.25rem;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: #2563eb !important;
+        background-color: #eff6ff;
+        border-color: #93c5fd;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        border-color: #2563eb !important;
+    }
+    
+    .nav-tabs .nav-link i {
+        margin-right: 6px;
+    }
+    
+    .card-header {
+        background-color: #f9fafb !important;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .nav-tabs {
+        border-bottom: none;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="header-page">
     <h1><i class="bi bi-speedometer2"></i> Dashboard Operator</h1>
@@ -83,9 +124,14 @@
                                         <td>{{ Str::limit($item->lokasi_pemasangan, 25) }}</td>
                                         <td>{{ $item->created_at->format('d M Y') }}</td>
                                         <td>
-                                            <a href="{{ route('approval.verify', $item) }}" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-check-circle"></i> Verifikasi
-                                            </a>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success" title="Periksa Dokumen">
+                                                    <i class="bi bi-file-earmark-check"></i>
+                                                </a>
+                                                <a href="{{ route('approval.verify', $item) }}" class="btn btn-primary" title="Verifikasi">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -128,9 +174,14 @@
                                         <td>{{ Str::limit($item->lokasi_pemasangan, 25) }}</td>
                                         <td>{{ $item->updated_at->format('d M Y') }}</td>
                                         <td>
-                                            <a href="{{ route('approval.verify', $item) }}" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-check-circle"></i> Verifikasi Revisi
-                                            </a>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success" title="Periksa Dokumen">
+                                                    <i class="bi bi-file-earmark-check"></i>
+                                                </a>
+                                                <a href="{{ route('approval.verify', $item) }}" class="btn btn-primary" title="Verifikasi Revisi">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

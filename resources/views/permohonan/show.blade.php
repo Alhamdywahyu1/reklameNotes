@@ -230,7 +230,7 @@
                     @endif
 
                     {{-- Check button untuk Staff --}}
-                    @if (auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang']))
+                    @if (auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin']))
                         <a href="{{ route('document-requirements.check', $permohonan) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-check-circle"></i> Periksa Dokumen
                         </a>
@@ -261,14 +261,27 @@
                                     </td>
                                     <td>
                                         @php
-                                            $statusClass = match($item->status ?? 'Belum Lengkap') {
-                                                'Lengkap' => 'bg-success',
-                                                'Ditolak' => 'bg-danger',
-                                                default => 'bg-warning text-dark'
-                                            };
+                                            // Logika status:
+                                            // - Lengkap: sudah diverifikasi dan disetujui
+                                            // - Ditolak: sudah diverifikasi dan ditolak
+                                            // - Dalam Peninjauan: file sudah ada tapi belum dicheck
+                                            // - Belum Lengkap: file belum diupload
+                                            if ($item->status === 'Lengkap') {
+                                                $displayStatus = 'Lengkap';
+                                                $statusClass = 'bg-success';
+                                            } elseif ($item->status === 'Ditolak') {
+                                                $displayStatus = 'Ditolak';
+                                                $statusClass = 'bg-danger';
+                                            } elseif ($item->file_dokumen) {
+                                                $displayStatus = 'Dalam Peninjauan';
+                                                $statusClass = 'bg-info';
+                                            } else {
+                                                $displayStatus = 'Belum Lengkap';
+                                                $statusClass = 'bg-warning text-dark';
+                                            }
                                         @endphp
                                         <span class="badge {{ $statusClass }}">
-                                            {{ $item->status ?? 'Belum Lengkap' }}
+                                            {{ $displayStatus }}
                                         </span>
                                     </td>
                                     <td>
@@ -280,9 +293,20 @@
                                     </td>
                                     <td>
                                         @if ($item->file_dokumen)
-                                            <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-sm btn-outline-primary" title="Download dokumen">
-                                                <i class="bi bi-download"></i>
-                                            </a>
+                                            @php
+                                                $extension = strtolower(pathinfo($item->file_dokumen, PATHINFO_EXTENSION));
+                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif']);
+                                            @endphp
+                                            <div class="btn-group btn-group-sm">
+                                                @if($isImage)
+                                                    <a href="{{ route('document-requirements.preview', $item) }}" class="btn btn-outline-info" title="Lihat dokumen" target="_blank">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                @endif
+                                                <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-outline-primary" title="Download dokumen">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
                                         @else
                                             <small class="text-muted">-</small>
                                         @endif

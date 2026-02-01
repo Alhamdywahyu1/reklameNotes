@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SuratDiprintOlehOperator;
 use App\Models\PermohonanReklame;
 use App\Models\ActivityLog;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -70,14 +71,13 @@ class PrintController extends Controller
 
     /**
      * Print surat persetujuan reklame (called after final approval).
+     * Only operator can access this
      */
     public function printSurat(PermohonanReklame $permohonan): View
     {
-        // Check authorization: owner of permohonan OR operator/admin
-        if ($permohonan->user_id !== auth()->id()) {
-            if (!auth()->user()->hasAnyRole(['operator', 'admin'])) {
-                abort(403, 'Anda tidak memiliki akses ke halaman ini');
-            }
+        // Only operator and admin can print surat
+        if (!auth()->user()->hasAnyRole(['operator', 'admin'])) {
+            abort(403, 'Hanya Operator yang dapat mencetak surat persetujuan');
         }
 
         // Only printable if final approval
@@ -89,5 +89,26 @@ class PrintController extends Controller
         $finalApproval = $approvals->where('status_approval', 'Disetujui Kepala Bidang')->first();
 
         return view('print.surat', compact('permohonan', 'approvals', 'finalApproval'));
+    }
+
+    /**
+     * Track print surat action and send notification
+     */
+    public function trackPrintSurat(PermohonanReklame $permohonan): Response
+    {
+        // Only operator and admin can print surat
+        if (!auth()->user()->hasAnyRole(['operator', 'admin'])) {
+            abort(403, 'Hanya Operator yang dapat mencetak surat persetujuan');
+        }
+
+        // Only printable if final approval
+        if (!$permohonan->isPrintable()) {
+            abort(403, 'Surat hanya dapat dicetak setelah mendapat persetujuan final');
+        }
+
+        // Dispatch event to send notification and email
+        SuratDiprintOlehOperator::dispatch($permohonan, auth()->id());
+
+        return response()->json(['message' => 'Surat berhasil dicetak. Notifikasi telah dikirim ke pemohon.']);
     }
 }
