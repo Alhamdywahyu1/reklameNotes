@@ -209,8 +209,9 @@ class PermohonanReklameController extends Controller
 
         $persyaratan = $permohonan->persyaratanDokumen()->get();
         $approvals = $permohonan->approvalWorkflows()->get();
+        $suratPernyataan = $permohonan->suratPernyataan;
 
-        return view('permohonan.show', compact('permohonan', 'persyaratan', 'approvals'));
+        return view('permohonan.show', compact('permohonan', 'persyaratan', 'approvals', 'suratPernyataan'));
     }
 
     /**

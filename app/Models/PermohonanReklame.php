@@ -71,6 +71,11 @@ class PermohonanReklame extends Model
         return $this->hasMany(ApprovalWorkflow::class, 'permohonan_id')->orderBy('created_at', 'desc');
     }
 
+    public function suratPernyataan()
+    {
+        return $this->hasOne(SuratPernyataan::class, 'permohonan_id');
+    }
+
     public function generateNomorRegistrasi(): string
     {
         do {

@@ -336,6 +336,87 @@
             </div>
         </div>
 
+        <!-- Surat Pernyataan -->
+        <div class="card mb-3">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Surat Pernyataan</h5>
+                <div>
+                    @if (auth()->user()->hasRole('pemohon') && $permohonan->user_id === auth()->id())
+                        @if (!$suratPernyataan)
+                            <a href="{{ route('surat-pernyataan.create', $permohonan) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-circle"></i> Buat Surat Pernyataan
+                            </a>
+                        @else
+                            @if ($suratPernyataan->status === 'draft')
+                                <a href="{{ route('surat-pernyataan.edit', $permohonan) }}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                            @endif
+                            <a href="{{ route('surat-pernyataan.show', $permohonan) }}" class="btn btn-sm btn-info">
+                                <i class="bi bi-eye"></i> Lihat
+                            </a>
+                        @endif
+                    @endif
+                </div>
+            </div>
+            <div class="card-body">
+                @if ($suratPernyataan)
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Status Pernyataan</small>
+                            <span class="badge bg-{{ $suratPernyataan->status == 'verified' ? 'success' : ($suratPernyataan->status == 'rejected' ? 'danger' : 'warning') }}">
+                                {{ ucfirst($suratPernyataan->status) }}
+                            </span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Semua Syarat Disetujui</small>
+                            @if($suratPernyataan->areAllConditionsAgreed())
+                                <span class="badge bg-success">Ya</span>
+                            @else
+                                <span class="badge bg-danger">Tidak</span>
+                            @endif
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Disubmit</small>
+                            <strong>{{ $suratPernyataan->submitted_at ? $suratPernyataan->submitted_at->format('d/m/Y H:i') : '-' }}</strong>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block">Diverifikasi</small>
+                            <strong>{{ $suratPernyataan->verified_at ? $suratPernyataan->verified_at->format('d/m/Y H:i') : '-' }}</strong>
+                        </div>
+                    </div>
+
+                    @if ($suratPernyataan->status === 'rejected' && $suratPernyataan->keterangan_penolakan)
+                        <div class="alert alert-danger mt-3">
+                            <h6 class="alert-heading">
+                                <i class="bi bi-exclamation-circle"></i> Keterangan Penolakan
+                            </h6>
+                            {{ $suratPernyataan->keterangan_penolakan }}
+                        </div>
+                    @endif
+
+                    <div class="mt-3">
+                        <a href="{{ route('surat-pernyataan.show', $permohonan) }}" class="btn btn-sm btn-info">
+                            <i class="bi bi-eye"></i> Lihat Detail
+                        </a>
+                        <a href="{{ route('surat-pernyataan.download-pdf', $permohonan) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                            <i class="bi bi-file-pdf"></i> Download PDF
+                        </a>
+                    </div>
+                @else
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        @if (auth()->user()->hasRole('pemohon') && $permohonan->user_id === auth()->id())
+                            <strong>Belum ada Surat Pernyataan</strong><br>
+                            <small>Silakan buat surat pernyataan untuk melengkapi permohonan Anda dengan mengklik tombol "Buat Surat Pernyataan" di atas.</small>
+                        @else
+                            <strong>Surat Pernyataan belum dibuat oleh pemohon</strong>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
+
         <!-- Riwayat Approval -->
         <div class="card">
             <div class="card-header bg-light">

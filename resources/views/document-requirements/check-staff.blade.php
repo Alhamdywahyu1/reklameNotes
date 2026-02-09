@@ -128,10 +128,25 @@
             <h1><i class="bi bi-file-earmark-check"></i> Pemeriksaan Dokumen</h1>
             <p class="text-muted">{{ $permohonan->nomor_registrasi }} - {{ $permohonan->nama_pemohon }}</p>
         </div>
-        <div>
+        <div class="d-flex gap-2">
             <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> Kembali ke Detail
             </a>
+            
+            @if(auth()->user()->hasRole('operator') && !$requirements->isEmpty())
+                @php
+                    $belumLengkapCount = $requirements->where('status', '!=', 'Lengkap')->count();
+                @endphp
+                @if($belumLengkapCount > 0)
+                    <form action="{{ route('document-requirements.approve-all', $permohonan) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menyetujui semua {{ $belumLengkapCount }} dokumen sekaligus?');">
+                        @csrf
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check2-all"></i> Setujui Semua Dokumen
+                        </button>
+                    </form>
+                @endif
+            @endif
+            
             @if($permohonan->canBeApprovedByOperator() && auth()->user()->hasRole('operator'))
                 <a href="{{ route('approval.verify', $permohonan) }}" class="btn btn-primary">
                     <i class="bi bi-check-circle"></i> Lanjut Verifikasi

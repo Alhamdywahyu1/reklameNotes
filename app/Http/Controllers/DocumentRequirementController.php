@@ -248,6 +248,65 @@ class DocumentRequirementController extends Controller
     }
 
     /**
+     * Menyetujui semua dokumen sekaligus untuk operator
+     */
+    public function approveAllDocuments(Request $request, PermohonanReklame $permohonan): RedirectResponse
+    {
+        // Cek otorisasi hanya untuk operator
+        if (!auth()->user()->hasRole('operator')) {
+            abort(403, 'Hanya operator yang dapat menyetujui semua dokumen sekaligus');
+        }
+
+        $requirements = $permohonan->documentRequirements()->get();
+
+        if ($requirements->isEmpty()) {
+            return redirect()->back()
+                ->with('warning', 'Tidak ada dokumen untuk disetujui');
+        }
+
+        // Hitung berapa banyak dokumen yang sudah lengkap
+        $notApprovedCount = 0;
+        $approvedCount = 0;
+
+        foreach ($requirements as $requirement) {
+            $oldStatus = $requirement->status;
+            
+            if ($requirement->status !== 'Lengkap') {
+                // Hanya update yang belum approved
+                $requirement->update([
+                    'status' => 'Lengkap',
+                    'catatan_penolakan' => null,
+                ]);
+
+                // Log document approval
+                ActivityLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'DOCUMENT_VERIFICATION_BULK',
+                    'model_type' => 'PersyaratanDokumen',
+                    'model_id' => $requirement->id,
+                    'description' => "Menyetujui dokumen '{$requirement->jenis_persyaratan}' (batch approve) untuk permohonan {$permohonan->nomor_registrasi}",
+                    'old_values' => ['status' => $oldStatus],
+                    'new_values' => ['status' => 'Lengkap', 'catatan_penolakan' => null],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'created_at' => now(),
+                ]);
+
+                $notApprovedCount++;
+            } else {
+                $approvedCount++;
+            }
+        }
+
+        $message = $notApprovedCount > 0 
+            ? "{$notApprovedCount} dokumen berhasil disetujui ({$approvedCount} sudah disetujui sebelumnya)"
+            : "Semua dokumen sudah disetujui sebelumnya";
+
+        return redirect()->back()
+            ->with('success', $message);
+    }
+
+    /**
      * Hapus persyaratan dokumen.
      */
     public function destroy(DocumentRequirement $requirement): RedirectResponse

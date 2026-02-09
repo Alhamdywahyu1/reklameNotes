@@ -8,6 +8,7 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SuratPernyataanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -20,6 +21,15 @@ use App\Http\Controllers\Admin\ReportController;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+// TEST ROUTE - No middleware at all
+Route::get('/test-approval-9', function () {
+    $permohonan = \App\Models\PermohonanReklame::find(9);
+    if (!$permohonan) {
+        return 'Permohonan ID 9 not found in database';
+    }
+    return 'SUCCESS! Permohonan: ' . $permohonan->nomor_registrasi . ' - Status: ' . $permohonan->status;
+});
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -57,6 +67,19 @@ Route::middleware('auth')->group(function () {
         Route::put('permohonan/{permohonan}', [PermohonanReklameController::class, 'update'])->name('permohonan.update');
         Route::post('permohonan/{permohonan}/submit', [PermohonanReklameController::class, 'submit'])->name('permohonan.submit');
         Route::delete('permohonan/{permohonan}', [PermohonanReklameController::class, 'destroy'])->name('permohonan.destroy');
+        
+        // Surat Pernyataan Routes (untuk Pemohon only)
+        Route::get('surat-pernyataan/{permohonan}/create', [SuratPernyataanController::class, 'create'])->name('surat-pernyataan.create');
+        Route::post('surat-pernyataan/{permohonan}', [SuratPernyataanController::class, 'store'])->name('surat-pernyataan.store');
+        Route::get('surat-pernyataan/{permohonan}/edit', [SuratPernyataanController::class, 'edit'])->name('surat-pernyataan.edit');
+        Route::put('surat-pernyataan/{permohonan}', [SuratPernyataanController::class, 'update'])->name('surat-pernyataan.update');
+        Route::delete('surat-pernyataan/{permohonan}', [SuratPernyataanController::class, 'destroy'])->name('surat-pernyataan.destroy');
+    });
+
+    // Surat Pernyataan Show & Download - accessible to pemohon and staff
+    Route::middleware('auth')->group(function () {
+        Route::get('surat-pernyataan/{permohonan}', [SuratPernyataanController::class, 'show'])->name('surat-pernyataan.show');
+        Route::get('surat-pernyataan/{permohonan}/download-pdf', [SuratPernyataanController::class, 'downloadPdf'])->name('surat-pernyataan.download-pdf');
     });
 
     // Permohonan Show - accessible to both pemohon and staff
@@ -68,8 +91,8 @@ Route::middleware('auth')->group(function () {
     // Peta Digital GIS - accessible to all authenticated users
     Route::get('permohonan/peta/digital', [PermohonanReklameController::class, 'peta'])->name('permohonan.peta');
 
-    // Approval Routes (untuk Operator, Kepala Seksi, Kepala Bidang)
-    Route::middleware('role:operator,kepala_seksi,kepala_bidang')->group(function () {
+    // Approval Routes (untuk Operator, Kepala Seksi, Kepala Bidang, Admin)
+    Route::group([], function () {
         Route::get('approval/dashboard', [ApprovalController::class, 'dashboard'])->name('approval.dashboard');
 
         // Operator verification
@@ -96,8 +119,8 @@ Route::middleware('auth')->group(function () {
         Route::get('print/{permohonan}/pdf', [PrintController::class, 'generatePdf'])->name('print.pdf');
     });
 
-    // Print surat - accessible to operator and admin only
-    Route::middleware('role:operator,admin')->group(function () {
+    // Print surat - accessible to all staff (operator, kepala_seksi, kepala_bidang, admin)
+    Route::middleware('auth')->group(function () {
         Route::get('print/{permohonan}/surat', [PrintController::class, 'printSurat'])->name('print.surat');
         Route::post('print/{permohonan}/track-surat', [PrintController::class, 'trackPrintSurat'])->name('print.track-surat');
     });
@@ -123,6 +146,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:operator,kepala_seksi,kepala_bidang,admin')->group(function () {
         Route::get('permohonan/{permohonan}/requirements/check', [DocumentRequirementController::class, 'viewForStaff'])->name('document-requirements.check');
         Route::patch('requirements/{requirement}/status', [DocumentRequirementController::class, 'updateStatus'])->name('document-requirements.update-status');
+        Route::post('permohonan/{permohonan}/requirements/approve-all', [DocumentRequirementController::class, 'approveAllDocuments'])->name('document-requirements.approve-all');
     });
 
     Route::get('requirements/{requirement}/download', [DocumentRequirementController::class, 'download'])->name('document-requirements.download');

@@ -188,7 +188,7 @@
             background: white;
         }
 
-        .card:hover {
+        .card:not(:has(canvas)):hover {
             box-shadow: 0 8px 25px rgba(0,0,0,0.12);
             transform: translateY(-2px);
         }
@@ -595,7 +595,7 @@
                     </div>
                 @endif
 
-                <div class="main-content">
+                <div class="main-content container-xl">
                     @yield('content')
                 </div>
             </main>
