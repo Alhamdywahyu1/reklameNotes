@@ -210,10 +210,10 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 mt-5">
-                        <a href="{{ route('surat-pernyataan.show', $permohonan) }}" class="btn btn-secondary">
+                        <a href="{{ route('surat-pernyataan.show', $permohonan) }}" class="btn btn-secondary" style="background: #cbd5e1; color: #0f172a; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                             <i class="bi bi-arrow-left"></i> Batal
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                             <i class="bi bi-check-circle"></i> Simpan Perubahan
                         </button>
                     </div>

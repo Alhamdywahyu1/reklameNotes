@@ -68,8 +68,13 @@ Route::middleware('auth')->group(function () {
         Route::post('permohonan/{permohonan}/submit', [PermohonanReklameController::class, 'submit'])->name('permohonan.submit');
         Route::delete('permohonan/{permohonan}', [PermohonanReklameController::class, 'destroy'])->name('permohonan.destroy');
         
+        // Form Step 2 Routes
+        Route::get('permohonan/{permohonan}/step2', [PermohonanReklameController::class, 'editStep2'])->name('permohonan.editStep2');
+        Route::put('permohonan/{permohonan}/step2', [PermohonanReklameController::class, 'updateStep2'])->name('permohonan.updateStep2');
+        
         // Surat Pernyataan Routes (untuk Pemohon only)
         Route::get('surat-pernyataan/{permohonan}/create', [SuratPernyataanController::class, 'create'])->name('surat-pernyataan.create');
+        Route::get('surat-pernyataan/{permohonan}/step3', [SuratPernyataanController::class, 'editStep3'])->name('permohonan.editStep3');
         Route::post('surat-pernyataan/{permohonan}', [SuratPernyataanController::class, 'store'])->name('surat-pernyataan.store');
         Route::get('surat-pernyataan/{permohonan}/edit', [SuratPernyataanController::class, 'edit'])->name('surat-pernyataan.edit');
         Route::put('surat-pernyataan/{permohonan}', [SuratPernyataanController::class, 'update'])->name('surat-pernyataan.update');
@@ -151,6 +156,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('requirements/{requirement}/download', [DocumentRequirementController::class, 'download'])->name('document-requirements.download');
     Route::get('requirements/{requirement}/preview', [DocumentRequirementController::class, 'preview'])->name('document-requirements.preview');
+    
     Route::delete('requirements/{requirement}', [DocumentRequirementController::class, 'destroy'])->name('document-requirements.destroy');
 
     // Verify email

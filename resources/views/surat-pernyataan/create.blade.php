@@ -4,8 +4,35 @@
 
 @section('content')
 <div class="header-page">
-    <h1><i class="bi bi-file-earmark-text"></i> Surat Pernyataan</h1>
-    <p class="text-muted">Isi dan tandatangani surat pernyataan reklame</p>
+    <h1><i class="bi bi-file-earmark-text"></i> Form Pendaftaran Step 3 - Surat Pernyataan</h1>
+    <p class="text-muted">Isi dan tandatangani surat pernyataan reklame - Nomor Registrasi: <strong>{{ $permohonan->nomor_registrasi }}</strong></p>
+</div>
+
+<!-- Progress Bar -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between mb-3">
+        <div class="text-center flex-grow-1">
+            <div class="badge bg-success rounded-circle p-2 mb-2" style="font-size: 0.9rem; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="bi bi-check"></i>
+            </div>
+            <p class="small fw-bold">Step 1: Data Pemohon</p>
+        </div>
+        <div class="text-center flex-grow-1">
+            <div class="badge bg-success rounded-circle p-2 mb-2" style="font-size: 0.9rem; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="bi bi-check"></i>
+            </div>
+            <p class="small fw-bold">Step 2: Detail Reklame</p>
+        </div>
+        <div class="text-center flex-grow-1">
+            <div class="badge bg-primary rounded-circle p-2 mb-2" style="font-size: 0.9rem; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;">
+                3
+            </div>
+            <p class="small fw-bold">Step 3: Surat Pernyataan</p>
+        </div>
+    </div>
+    <div class="progress" style="height: 3px;">
+        <div class="progress-bar" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
 </div>
 
 <div class="row g-5">
@@ -210,10 +237,10 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 mt-5">
-                        <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary">
+                        <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary" style="background: #cbd5e1; color: #0f172a; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                             <i class="bi bi-check-circle"></i> Simpan & Submit
                         </button>
                     </div>

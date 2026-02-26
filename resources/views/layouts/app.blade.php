@@ -6,24 +6,29 @@
     <title>@yield('title', 'Sistem Pendaftaran Reklame') - DPMPTSP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Warna Profesional & Formal - Navy & Gold */
-            --primary: #0f172a;
-            --primary-light: #1e293b;
-            --primary-dark: #020617;
-            --accent: #b8860b;
-            --accent-light: #d4a84b;
-            --accent-dark: #8b6914;
-            --secondary: #475569;
+            /* Tema Biru Muda Modern - DPMPTSP Bangkalan */
+            --primary-lightest: #f0f9ff;
+            --primary-soft: #e0f2fe;
+            --primary-mid: #bae6fd;
+            --primary: #0284c7;
+            --primary-deep: #0369a1;
+            --primary-dark: #075985;
+            --gray-light: #f8fafc;
+            --gray-border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --white: #ffffff;
+            --shadow-sm: 0 8px 20px rgba(2, 132, 199, 0.06);
+            --shadow-hover: 0 20px 30px -8px rgba(2, 132, 199, 0.12);
+            --radius-card: 1.25rem;
+            --radius-btn: 2rem;
             --success: #166534;
             --danger: #991b1b;
             --warning: #b45309;
             --info: #1e40af;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --muted: #64748b;
-            --border: #e2e8f0;
         }
 
         * {
@@ -37,20 +42,20 @@
         }
 
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            color: var(--dark);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(120deg, #f6fcff, #ebf7ff);
+            color: var(--text-dark);
         }
 
-        /* Navbar Profesional */
+        /* Navbar Modern Biru Muda */
         .navbar {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--primary) 100%);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #075985 0%, #0369a1 100%);
+            box-shadow: var(--shadow-sm);
             padding: 0.75rem 0;
             position: sticky;
             top: 0;
             z-index: 1030;
-            border-bottom: 3px solid var(--accent);
+            border-bottom: none;
         }
 
         .navbar .navbar-brand {
@@ -83,7 +88,7 @@
         }
 
         .navbar .nav-link:hover {
-            color: var(--accent-light) !important;
+            color: #b9e6f5 !important;
             background-color: rgba(255, 255, 255, 0.1);
         }
 
@@ -97,23 +102,22 @@
             background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
             width: 260px;
             overflow-y: auto;
-            box-shadow: 2px 0 15px rgba(0,0,0,0.08);
+            box-shadow: 2px 0 15px rgba(2, 132, 199, 0.06);
             padding: 1.5rem 0;
-            border-right: 1px solid var(--border);
+            border-right: 1px solid var(--gray-border);
         }
 
         .sidebar .nav-link {
-            color: var(--secondary);
+            color: var(--text-muted);
             padding: 0.85rem 1.5rem;
             border-left: 3px solid transparent;
             transition: all 0.3s ease;
-            border-radius: 0;
+            border-radius: 8px;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 12px;
             margin: 0 0.5rem;
-            border-radius: 8px;
         }
 
         .sidebar .nav-link i {
@@ -124,22 +128,22 @@
 
         .sidebar .nav-link:hover {
             color: var(--primary);
-            background-color: rgba(15, 23, 42, 0.06);
-            border-left: 3px solid var(--accent);
+            background-color: rgba(2, 132, 199, 0.06);
+            border-left: 3px solid var(--primary);
         }
 
         .sidebar .nav-link.active {
             color: white;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            border-left: 3px solid var(--accent);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+            border-left: 3px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
         }
 
         .sidebar-section-title {
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            color: var(--accent-dark);
+            color: var(--primary-deep);
             padding: 1rem 1.5rem 0.5rem;
             letter-spacing: 1px;
         }
@@ -149,7 +153,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 2rem;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            background: linear-gradient(120deg, #f6fcff, #ebf7ff);
         }
 
         .main-content {
@@ -164,7 +168,7 @@
         }
 
         .header-page h1 {
-            color: var(--primary);
+            color: #0a3b4e;
             font-weight: 700;
             font-size: 1.85rem;
             margin-bottom: 0.5rem;
@@ -174,70 +178,71 @@
         }
 
         .header-page p {
-            color: var(--muted);
+            color: var(--text-muted);
             margin: 0;
         }
 
-        /* Card Profesional */
+        /* Card Modern */
         .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(2, 132, 199, 0.1);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.2, 1);
             overflow: hidden;
             background: white;
         }
 
         .card:not(:has(canvas)):hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            box-shadow: var(--shadow-hover);
             transform: translateY(-2px);
+            border-color: rgba(2, 132, 199, 0.25);
         }
 
         .card-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
             color: white;
             border: none;
             padding: 1.15rem 1.5rem;
             font-weight: 600;
-            border-bottom: 3px solid var(--accent);
+            border-bottom: none;
         }
 
         .card-body {
             padding: 1.5rem;
         }
 
-        /* Stats Card Profesional */
+        /* Stats Card Modern */
         .stats-card {
             text-align: center;
             padding: 1.75rem 1.5rem;
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border-top: 4px solid var(--accent);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s;
+            border-top: 4px solid var(--primary);
         }
 
         .stats-card:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            transform: scale(1.02);
         }
 
         .stats-card i {
             font-size: 2.5rem;
             margin-bottom: 0.75rem;
-            color: var(--accent-dark);
+            color: var(--primary);
         }
 
         .stats-card .number {
             font-size: 2.25rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--primary-deep);
             line-height: 1;
             margin-bottom: 0.5rem;
         }
 
         .stats-card .label {
-            color: var(--muted);
+            color: var(--text-muted);
             font-size: 0.9rem;
             font-weight: 500;
         }
@@ -297,8 +302,8 @@
 
         /* Form Controls */
         .form-control, .form-select {
-            border: 1.5px solid var(--border);
-            border-radius: 6px;
+            border: 1.5px solid var(--gray-border);
+            border-radius: 0.75rem;
             padding: 0.65rem 1rem;
             transition: all 0.3s ease;
             background-color: #ffffff;
@@ -306,43 +311,42 @@
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
         }
 
-        /* Alert Profesional */
+        /* Alert Modern */
         .alert {
             border: none;
-            border-radius: 8px;
+            border-radius: 0.75rem;
             border-left: 4px solid;
             padding: 1rem 1.5rem;
             display: flex;
             align-items: center;
             gap: 12px;
-            background: white;
         }
 
         .alert-success {
-            background-color: #f0fdf4;
-            border-left-color: var(--success);
+            background-color: #ecfdf5;
+            border-left-color: #10b981;
             color: #065f46;
         }
 
         .alert-danger {
             background-color: #fef2f2;
-            border-left-color: var(--danger);
-            color: #7f1d1d;
+            border-left-color: #ef4444;
+            color: #991b1b;
         }
 
         .alert-warning {
             background-color: #fffbeb;
-            border-left-color: var(--warning);
-            color: #78350f;
+            border-left-color: #f59e0b;
+            color: #92400e;
         }
 
         .alert-info {
-            background-color: #eff6ff;
-            border-left-color: var(--info);
-            color: #0c2340;
+            background-color: #f0f9ff;
+            border-left-color: var(--primary);
+            color: #0c4a6e;
         }
 
         /* Table */
@@ -482,6 +486,31 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+
+        /* Footer Modern Biru Tua */
+        footer {
+            background: #0b3b4c;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 2.5rem 0;
+            text-align: center;
+            font-size: 0.98rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(2, 132, 199, 0.2);
+        }
+
+        footer .footer-brand {
+            font-weight: 700;
+            color: #b9e6f5;
+        }
+
+        footer .footer-bottom {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        footer i {
+            color: #9ad4e6;
+            margin-right: 4px;
         }
     </style>
     <link rel="stylesheet" href="{{ asset('css/modern-dashboard.css') }}">

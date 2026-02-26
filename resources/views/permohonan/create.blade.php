@@ -126,7 +126,7 @@
                         <label for="searchAddress" class="form-label fw-600">Cari Alamat <span class="text-danger">*</span></label>
                         <div class="input-group mb-2">
                             <input type="text" class="form-control" id="searchAddress" placeholder="Ketik alamat lengkap (contoh: Jl. Sudirman No. 10, Jakarta Pusat)" value="{{ old('lokasi_pemasangan') }}">
-                            <button class="btn btn-primary" type="button" id="searchBtn"><i class="bi bi-search"></i> Cari</button>
+                            <button class="btn btn-primary" type="button" id="searchBtn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600;"><i class="bi bi-search"></i> Cari</button>
                         </div>
                         <small class="text-muted d-block">
                             <i class="bi bi-lightbulb"></i> Tips: Ketikkan alamat lengkap dengan nama jalan, nomor, dan kota untuk hasil yang lebih akurat. Atau klik langsung pada peta untuk menandai lokasi.
@@ -166,6 +166,23 @@
 
                     <h5 class="mb-4 pb-3 border-bottom" style="color: #1a5490;"><i class="bi bi-file-earmark-check"></i> Persyaratan Dokumen</h5>
 
+                    <!-- Download Form Reklame PDF -->
+                    <div class="alert alert-success mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <i class="bi bi-file-earmark-pdf fs-5 me-2"></i>
+                            <strong>Download Formulir Reklame</strong>
+                            <small class="d-block text-muted">Unduh formulir yang diperlukan sebelum mengisi permohonan</small>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{{ asset('fom reklame-halaman-halaman-1.pdf') }}" class="btn btn-sm btn-success" download>
+                                <i class="bi bi-download me-1"></i> Formulir Halaman 1
+                            </a>
+                            <a href="{{ asset('fom reklame-halaman-halaman-3.pdf') }}" class="btn btn-sm btn-success" download>
+                                <i class="bi bi-download me-1"></i> Formulir Halaman 2
+                            </a>
+                        </div>
+                    </div>
+
                     <p class="small text-muted mb-4">
                         <i class="bi bi-info-circle"></i> Upload dokumen pendukung di bawah ini. 
                         Dokumen yang ditandai <span class="badge bg-danger" style="font-size: 0.7rem;">Wajib</span> 
@@ -180,7 +197,6 @@
                             ['jenis' => 'Fotocopy Akta Pendirian', 'optional' => false],
                             ['jenis' => 'Fotocopy Retribusi Pajak Reklame', 'optional' => false],
                             ['jenis' => 'Data Isian Pemohon', 'optional' => false],
-                            ['jenis' => 'Surat Pernyataan Pertanggungjawaban Konstruksi', 'optional' => false],
                             ['jenis' => 'Foto kondisi & visualisasi reklame', 'optional' => false],
                             ['jenis' => 'Gambar konstruksi bidang', 'optional' => false],
                             ['jenis' => 'Surat Kuasa', 'optional' => true],
@@ -225,11 +241,11 @@
 
                     <hr>
 
-                    
-                        <button type="submit" class="btn btn-primary">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                             <i class="bi bi-check-circle"></i> Simpan
                         </button>
-                        <a href="{{ route('permohonan.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('permohonan.index') }}" class="btn btn-secondary" style="background: #cbd5e1; color: #0f172a; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                             <i class="bi bi-x-circle"></i> Batal
                         </a>
                     </div>

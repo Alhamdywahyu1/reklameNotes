@@ -42,6 +42,36 @@ class SuratPernyataanController extends Controller
     }
 
     /**
+     * Alias untuk create - digunakan untuk form step 3
+     */
+    public function editStep3(PermohonanReklame $permohonan): View
+    {
+        // Verify bahwa user adalah pemilik permohonan
+        if ($permohonan->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized');
+        }
+
+        // Check if form_step is minimum 2
+        if ($permohonan->form_step < 2) {
+            abort(403, 'Anda harus menyelesaikan step 2 terlebih dahulu');
+        }
+
+        // Check if Surat Pernyataan already exists
+        $suratPernyataan = $permohonan->suratPernyataan;
+        
+        // Pre-fill data dari permohonan
+        if (!$suratPernyataan) {
+            $suratPernyataan = new SuratPernyataan([
+                'nama_pemohon' => $permohonan->nama_pemohon,
+                'alamat_pemohon' => $permohonan->alamat_pemohon,
+                'no_ktp' => $permohonan->nik,
+            ]);
+        }
+
+        return view('surat-pernyataan.create', compact('permohonan', 'suratPernyataan'));
+    }
+
+    /**
      * Store Surat Pernyataan
      */
     public function store(Request $request, PermohonanReklame $permohonan): RedirectResponse

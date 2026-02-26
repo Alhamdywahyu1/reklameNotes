@@ -5,7 +5,7 @@
 @section('content')
 <style>
     body {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a5f 100%);
+        background: linear-gradient(145deg, #f0faff 0%, #e6f7ff 45%, #d9f0fe 100%);
         min-height: 100vh;
     }
     
@@ -19,20 +19,20 @@
 
     .login-card {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        border-radius: 1.25rem;
+        box-shadow: 0 20px 60px rgba(2, 132, 199, 0.15);
         overflow: hidden;
         max-width: 450px;
         width: 100%;
-        border-top: 5px solid #b8860b;
+        border: 1px solid rgba(2, 132, 199, 0.1);
     }
 
     .login-header {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        background: linear-gradient(135deg, #075985 0%, #0369a1 100%);
         padding: 2.5rem 2rem;
         color: white;
         text-align: center;
-        border-bottom: 3px solid #b8860b;
+        border-bottom: none;
     }
 
     .login-header .logo-section {
@@ -47,7 +47,7 @@
         height: 50px;
         border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        border: 2px solid #b8860b;
+        border: 2px solid #b9e6f5;
     }
 
     .login-header h2 {
@@ -60,7 +60,7 @@
         margin: 0.5rem 0 0 0;
         opacity: 0.85;
         font-size: 0.95rem;
-        color: #d4a84b;
+        color: #e0f2fe;
     }
 
     .login-body {
@@ -75,7 +75,7 @@
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 600;
-        color: #0f172a;
+        color: #0a3b4e;
         font-size: 0.95rem;
     }
 
@@ -83,27 +83,27 @@
         width: 100%;
         padding: 0.75rem 1rem;
         border: 1.5px solid #e2e8f0;
-        border-radius: 6px;
+        border-radius: 0.75rem;
         font-size: 0.95rem;
         transition: all 0.3s ease;
     }
 
     .form-group-login input:focus {
         outline: none;
-        border-color: #0f172a;
-        box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
     }
 
     .form-group-login input.is-invalid {
-        border-color: #991b1b;
-        box-shadow: 0 0 0 3px rgba(153, 27, 27, 0.1);
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
     }
 
     .invalid-feedback {
         display: block;
         margin-top: 0.5rem;
         font-size: 0.85rem;
-        color: #991b1b;
+        color: #ef4444;
     }
 
     .form-check-modern {
@@ -117,7 +117,7 @@
         height: 18px;
         margin-right: 0.5rem;
         cursor: pointer;
-        accent-color: #0f172a;
+        accent-color: #0284c7;
     }
 
     .form-check-modern label {
@@ -130,22 +130,22 @@
     .btn-login {
         width: 100%;
         padding: 0.85rem;
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
         color: white;
-        border: 2px solid #b8860b;
-        border-radius: 6px;
+        border: none;
+        border-radius: 2rem;
         font-weight: 600;
         font-size: 1rem;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         margin: 1.5rem 0 1rem 0;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
     }
 
     .btn-login:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.4);
-        background: linear-gradient(135deg, #b8860b 0%, #d4a84b 100%);
-        border-color: #b8860b;
+        box-shadow: 0 12px 24px rgba(2, 132, 199, 0.3);
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
     }
 
     .login-divider {
@@ -182,14 +182,14 @@
     }
 
     .login-footer a {
-        color: #0f172a;
+        color: #0284c7;
         text-decoration: none;
         font-weight: 600;
         transition: all 0.3s ease;
     }
 
     .login-footer a:hover {
-        color: #b8860b;
+        color: #0369a1;
         text-decoration: underline;
     }
 
@@ -199,7 +199,7 @@
     }
 
     .forgot-password a {
-        color: #b8860b;
+        color: #0284c7;
         text-decoration: none;
         font-size: 0.9rem;
         font-weight: 600;
@@ -207,7 +207,7 @@
 
     .forgot-password a:hover {
         text-decoration: underline;
-        color: #8b6914;
+        color: #075985;
     }
 </style>
 

@@ -161,7 +161,7 @@
                     <label for="searchAddress" class="form-label">Cari Alamat <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="searchAddress" placeholder="Ketik alamat lengkap (contoh: Jl. Sudirman No. 10, Jakarta Pusat)" value="{{ old('lokasi_pemasangan', $permohonan->lokasi_pemasangan) }}">
-                        <button class="btn btn-primary" type="button" id="searchBtn"><i class="bi bi-search"></i> Cari</button>
+                        <button class="btn btn-primary" type="button" id="searchBtn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600;"><i class="bi bi-search"></i> Cari</button>
                     </div>
                     <small class="text-muted d-block mt-2">
                         <i class="bi bi-lightbulb"></i> Ketikkan alamat lengkap lokasi reklame, kemudian klik "Cari" untuk menemukan koordinatnya di peta.
@@ -254,10 +254,10 @@
         </div>
 
         <div class="d-flex gap-2 mb-4">
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                 <i class="bi bi-check-circle"></i> Simpan Perubahan
             </button>
-            <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary">
+            <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary" style="background: #cbd5e1; color: #0f172a; border: none; font-weight: 600; padding: 0.75rem 2rem;">
                 <i class="bi bi-x-circle"></i> Batal
             </a>
         </div>

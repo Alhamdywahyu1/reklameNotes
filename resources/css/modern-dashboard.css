@@ -1,7 +1,11 @@
-/* Modern Dashboard Styles */
+/* Modern Dashboard Styles - Synchronized with Welcome */
 
 :root {
-    --primary: #2563eb;
+    --primary: #0284c7;
+    --primary-light: #e0f2fe;
+    --primary-soft: #bae6fd;
+    --primary-deep: #0369a1;
+    --primary-dark: #075985;
     --secondary: #f59e0b;
     --success: #10b981;
     --danger: #ef4444;
@@ -21,18 +25,20 @@
 
 .dashboard-card {
     background: white;
-    border-radius: 12px;
+    border-radius: 1.25rem;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.06);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.2, 1);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border: 1px solid rgba(2, 132, 199, 0.1);
 }
 
 .dashboard-card:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 30px -8px rgba(2, 132, 199, 0.12);
     transform: translateY(-4px);
+    border-color: rgba(2, 132, 199, 0.25);
 }
 
 .dashboard-card-header {
@@ -53,7 +59,7 @@
 }
 
 .dashboard-card-icon.primary {
-    background: rgba(37, 99, 235, 0.1);
+    background: linear-gradient(145deg, #e6f7ff, #d1eefe);
     color: var(--primary);
 }
 

@@ -20,7 +20,7 @@
 <div class="card">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Daftar Permohonan</h5>
-        <a href="{{ route('permohonan.create') }}" class="btn btn-sm btn-primary">
+        <a href="{{ route('permohonan.create') }}" class="btn btn-sm btn-success">
             <i class="bi bi-plus-circle"></i> Buat Permohonan Baru
         </a>
     </div>
