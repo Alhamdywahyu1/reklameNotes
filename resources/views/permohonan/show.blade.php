@@ -345,10 +345,10 @@
                 <p class="text-muted mb-3">Unduh formulir surat pernyataan dalam format PDF:</p>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="{{ asset('fom reklame-halaman-halaman-1.pdf') }}" class="btn btn-success" download>
-                        <i class="bi bi-download me-1"></i> Formulir Halaman 1
+                        <i class="bi bi-download me-1"></i> Data Isian Pemohon
                     </a>
                     <a href="{{ asset('fom reklame-halaman-halaman-3.pdf') }}" class="btn btn-success" download>
-                        <i class="bi bi-download me-1"></i> Formulir Halaman 2
+                        <i class="bi bi-download me-1"></i> Surat Pernyataan
                     </a>
                 </div>
             </div>
@@ -395,43 +395,43 @@
             <div class="card-body">
                 <h5><i class="bi bi-info-circle"></i> Informasi</h5>
                 <hr>
-                <p class="small mb-2">
-                    <strong>Status:</strong><br>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Status</small>
                     <span class="badge" style="background-color: 
                         @if($permohonan->status === 'Disetujui Kepala Bidang') #28a745
                         @elseif($permohonan->status === 'Ditolak Operator' || $permohonan->status === 'Ditolak Kepala Seksi') #dc3545
                         @else #17a2b8 @endif
-                        " class="w-100">
+                        ">
                         {{ $permohonan->status }}
                     </span>
-                </p>
+                </div>
 
                 @if ($permohonan->keterangan_penolakan)
-                    <div class="alert alert-danger small mt-3">
+                    <div class="alert alert-danger small py-2 px-3 mb-3">
                         <strong>Keterangan Penolakan:</strong><br>
                         {{ $permohonan->keterangan_penolakan }}
                     </div>
                 @endif
 
-                <hr>
-                <p class="small mb-2">
-                    <strong>Dokumen Tersedia:</strong><br>
-                    @if ($permohonan->file_ktp)
-                        <a href="{{ route('permohonan.download', [$permohonan, 'ktp']) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">
-                            <i class="bi bi-download"></i> KTP
-                        </a>
-                    @endif
-                    @if ($permohonan->file_npwp)
-                        <a href="{{ route('permohonan.download', [$permohonan, 'npwp']) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-1">
-                            <i class="bi bi-download"></i> NPWP
-                        </a>
-                    @endif
-                    @if ($permohonan->file_desain)
-                        <a href="{{ route('permohonan.download', [$permohonan, 'desain']) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-1">
-                            <i class="bi bi-download"></i> Desain
-                        </a>
-                    @endif
-                </p>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Nomor Registrasi</small>
+                    <strong>{{ $permohonan->nomor_registrasi }}</strong>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Pemohon</small>
+                    <span>{{ $permohonan->nama_pemohon }}</span>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1">Tanggal Dibuat</small>
+                    <span>{{ $permohonan->created_at->format('d M Y') }}</span>
+                </div>
+
+                <div class="mb-0">
+                    <small class="text-muted d-block mb-1">Terakhir Diperbarui</small>
+                    <span>{{ $permohonan->updated_at->format('d M Y H:i') }}</span>
+                </div>
             </div>
         </div>
 

@@ -575,9 +575,6 @@
                         <p>Isi formulir data pemohon & detail reklame secara lengkap.</p>
                     </div>
                 </div>
-                <div class="col-auto d-none d-lg-flex align-items-center px-0">
-                    <i class="bi bi-arrow-right process-arrow"></i>
-                </div>
                 <div class="col-6 col-lg-3">
                     <div class="process-card">
                         <div class="process-number">2</div>
@@ -585,18 +582,12 @@
                         <p>Lampirkan dokumen sesuai checklist yang tersedia.</p>
                     </div>
                 </div>
-                <div class="col-auto d-none d-lg-flex align-items-center px-0">
-                    <i class="bi bi-arrow-right process-arrow"></i>
-                </div>
                 <div class="col-6 col-lg-3">
                     <div class="process-card">
                         <div class="process-number">3</div>
                         <h5>Verifikasi</h5>
                         <p>Tim memverifikasi kelengkapan dan keabsahan data.</p>
                     </div>
-                </div>
-                <div class="col-auto d-none d-lg-flex align-items-center px-0">
-                    <i class="bi bi-arrow-right process-arrow"></i>
                 </div>
                 <div class="col-6 col-lg-3">
                     <div class="process-card">

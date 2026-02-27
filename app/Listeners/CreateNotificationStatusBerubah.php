@@ -24,20 +24,24 @@ class CreateNotificationStatusBerubah
      */
     public function handle(StatusBerubah $event): void
     {
-        // Notifikasi ke pemohon (owner permohonan)
-        Notification::create([
-            'user_id' => $event->permohonan->user_id,
-            'type' => 'STATUS_BERUBAH',
-            'title' => 'Status Permohonan Berubah',
-            'message' => "Status permohonan Anda berubah dari {$event->statusLama} menjadi {$event->statusBaru}",
-            'permohonan_id' => $event->permohonan->id,
-        ]);
+        try {
+            // Notifikasi ke pemohon (owner permohonan)
+            Notification::create([
+                'user_id' => $event->permohonan->user_id,
+                'type' => 'STATUS_BERUBAH',
+                'title' => 'Status Permohonan Berubah',
+                'message' => "Status permohonan Anda berubah dari {$event->statusLama} menjadi {$event->statusBaru}",
+                'permohonan_id' => $event->permohonan->id,
+            ]);
 
-        // Send email jika status Final Approved (Disetujui Kepala Bidang)
-        if ($event->statusBaru === 'Disetujui Kepala Bidang') {
-            Mail::to($event->permohonan->user->email)->send(
-                new PermohonanDisetujuiMail($event->permohonan)
-            );
+            // Send email jika status Final Approved (Disetujui Kepala Bidang)
+            if ($event->statusBaru === 'Disetujui Kepala Bidang') {
+                Mail::to($event->permohonan->user->email)->send(
+                    new PermohonanDisetujuiMail($event->permohonan)
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Gagal mengirim notifikasi status berubah: ' . $e->getMessage());
         }
     }
 }

@@ -23,7 +23,7 @@
     </div>
     <div class="col-md-3">
         <div class="card stats-card">
-            <div class="number" style="color: #0d6efd;">{{ $diajukan + $revisi }}</div>
+            <div class="number" style="color: #0d6efd;">{{ $sedangDiproses }}</div>
             <div class="label">Sedang Diproses</div>
         </div>
     </div>

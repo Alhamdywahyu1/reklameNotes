@@ -175,10 +175,10 @@
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
                             <a href="{{ asset('fom reklame-halaman-halaman-1.pdf') }}" class="btn btn-sm btn-success" download>
-                                <i class="bi bi-download me-1"></i> Formulir Halaman 1
+                                <i class="bi bi-download me-1"></i> Data Isian Pemohon
                             </a>
                             <a href="{{ asset('fom reklame-halaman-halaman-3.pdf') }}" class="btn btn-sm btn-success" download>
-                                <i class="bi bi-download me-1"></i> Formulir Halaman 2
+                                <i class="bi bi-download me-1"></i> Surat Pernyataan
                             </a>
                         </div>
                     </div>
@@ -197,6 +197,7 @@
                             ['jenis' => 'Fotocopy Akta Pendirian', 'optional' => false],
                             ['jenis' => 'Fotocopy Retribusi Pajak Reklame', 'optional' => false],
                             ['jenis' => 'Data Isian Pemohon', 'optional' => false],
+                            ['jenis' => 'Surat Pernyataan Pertanggungjawaban Konstruksi', 'optional' => false],
                             ['jenis' => 'Foto kondisi & visualisasi reklame', 'optional' => false],
                             ['jenis' => 'Gambar konstruksi bidang', 'optional' => false],
                             ['jenis' => 'Surat Kuasa', 'optional' => true],

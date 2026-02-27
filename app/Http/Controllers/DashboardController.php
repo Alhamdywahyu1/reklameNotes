@@ -42,8 +42,14 @@ class DashboardController extends Controller
         
         $totalPermohonan = $user->permohonanReklame()->count();
         $draft = $user->permohonanReklame()->where('status', 'Draft')->count();
-        $diajukan = $user->permohonanReklame()->where('status', 'Diajukan')->count();
-        $revisi = $user->permohonanReklame()->where('status', 'Revisi Menunggu Verifikasi')->count();
+        $sedangDiproses = $user->permohonanReklame()
+            ->whereIn('status', [
+                'Diajukan',
+                'Revisi Menunggu Verifikasi',
+                'Diverifikasi Operator',
+                'Disetujui Kepala Seksi',
+            ])
+            ->count();
         $disetujui = $user->permohonanReklame()->where('status', 'Disetujui Kepala Bidang')->count();
         $ditolak = $user->permohonanReklame()
             ->whereIn('status', ['Ditolak Operator', 'Ditolak Kepala Seksi', 'Ditolak Kepala Bidang'])
@@ -59,8 +65,7 @@ class DashboardController extends Controller
         return view('dashboard.pemohon', compact(
             'totalPermohonan',
             'draft',
-            'diajukan',
-            'revisi',
+            'sedangDiproses',
             'disetujui',
             'ditolak',
             'recentPermohonan'

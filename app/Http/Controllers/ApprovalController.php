@@ -33,8 +33,13 @@ class ApprovalController extends Controller
      */
     public function storeOperatorVerification(Request $request, PermohonanReklame $permohonan): RedirectResponse
     {
+        if (!auth()->user()->hasRole('operator')) {
+            abort(403, 'Hanya operator yang dapat mengakses halaman ini');
+        }
+
         if (!$permohonan->canBeApprovedByOperator()) {
-            abort(403);
+            return redirect()->route('approval.dashboard')
+                ->with('error', 'Permohonan tidak dapat diproses. Status saat ini: ' . $permohonan->status);
         }
 
         $validated = $request->validate([
@@ -125,8 +130,13 @@ class ApprovalController extends Controller
      */
     public function storeKepalaSeksiApproval(Request $request, PermohonanReklame $permohonan): RedirectResponse
     {
+        if (!auth()->user()->hasRole('kepala_seksi')) {
+            abort(403, 'Hanya Kepala Seksi yang dapat mengakses halaman ini');
+        }
+
         if (!$permohonan->canBeApprovedByKepalaSeksi()) {
-            abort(403);
+            return redirect()->route('approval.dashboard')
+                ->with('error', 'Permohonan tidak dapat diproses. Status saat ini: ' . $permohonan->status);
         }
 
         $validated = $request->validate([
