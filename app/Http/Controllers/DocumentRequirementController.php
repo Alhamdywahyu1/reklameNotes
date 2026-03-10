@@ -126,17 +126,29 @@ class DocumentRequirementController extends Controller
      */
     public function viewForStaff(PermohonanReklame $permohonan): View
     {
+        \Log::debug('DocumentRequirementController::viewForStaff - Called for permohonan ID: ' . $permohonan->id);
+        
         // Ensure user and role are loaded
         $user = auth()->user();
+        \Log::debug('DocumentRequirementController::viewForStaff - User ID: ' . $user->id . ', Email: ' . $user->email);
+        
         if (!$user->relationLoaded('role')) {
+            \Log::debug('DocumentRequirementController::viewForStaff - Role not loaded, calling load()');
             $user->load('role');
+        } else {
+            \Log::debug('DocumentRequirementController::viewForStaff - Role already loaded');
         }
 
+        \Log::debug('DocumentRequirementController::viewForStaff - User role_slug: ' . ($user->role?->slug ?? 'NULL'));
+        
         // Cek otorisasi hanya untuk staff
         if (!$user->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
+            \Log::warning('DocumentRequirementController::viewForStaff - Access denied for user ' . $user->email);
             abort(403, 'Hanya staff yang dapat mengakses halaman ini');
         }
 
+        \Log::debug('DocumentRequirementController::viewForStaff - Access granted, fetching requirements');
+        
         $requirements = $permohonan->documentRequirements()->get();
 
         return view('document-requirements.check-staff', compact('permohonan', 'requirements'));
