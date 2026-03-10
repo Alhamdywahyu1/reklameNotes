@@ -202,8 +202,13 @@ class PermohonanReklameController extends Controller
     {
         // Check authorization - allow owner or staff
         if ($permohonan->user_id !== auth()->id()) {
-            // Jika bukan pemilik, cek apakah staff (operator, kepala_seksi, kepala_bidang, admin)
-            if (!auth()->user()->role || !in_array(auth()->user()->role->slug, ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
+            // Jika bukan pemilik, cek apakah staff
+            $user = auth()->user();
+            if (!$user->relationLoaded('role')) {
+                $user->load('role');
+            }
+            $roleSlug = $user->role?->slug;
+            if (!in_array($roleSlug, ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
                 abort(403);
             }
         }
@@ -407,7 +412,7 @@ class PermohonanReklameController extends Controller
     {
         // Check authorization
         if ($permohonan->user_id !== auth()->id()) {
-            if (!auth()->user()->role || !in_array(auth()->user()->role->slug, ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
+            if (!auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
                 abort(403, 'Anda tidak memiliki akses untuk download file ini');
             }
         }

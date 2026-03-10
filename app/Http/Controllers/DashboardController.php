@@ -15,7 +15,11 @@ class DashboardController extends Controller
      */
     public function index(): View
     {
-        $userRole = auth()->user()->role?->slug;
+        $user = auth()->user();
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+        $userRole = $user->role?->slug;
 
         if ($userRole === 'pemohon') {
             return $this->pemohonDashboard();
@@ -206,7 +210,11 @@ class DashboardController extends Controller
      */
     public function reklameChart(): View
     {
-        $userRole = auth()->user()->role?->slug;
+        $user = auth()->user();
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+        $userRole = $user->role?->slug;
         
         if (!in_array($userRole, ['kepala_seksi', 'kepala_bidang'])) {
             abort(403, 'Hanya Kepala Seksi dan Kepala Bidang yang dapat mengakses halaman ini');

@@ -289,10 +289,13 @@ class ApprovalController extends Controller
     public function dashboard(): View
     {
         $user = auth()->user();
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
         $userRole = $user->role?->slug;
 
         // Check if user has proper role
-        if (!$userRole || !in_array($userRole, ['operator', 'kepala_seksi', 'kepala_bidang'])) {
+        if (!$userRole || !in_array($userRole, ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
             abort(403, 'Anda tidak memiliki akses ke fitur approval');
         }
 

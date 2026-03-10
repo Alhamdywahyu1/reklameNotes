@@ -89,11 +89,17 @@ class User extends Authenticatable
 
     public function hasRole(string $roleName): bool
     {
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
         return $this->role?->slug === $roleName;
     }
 
     public function hasAnyRole(array $roleNames): bool
     {
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
         return in_array($this->role?->slug, $roleNames);
     }
 }

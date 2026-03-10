@@ -122,7 +122,7 @@ class SuratPernyataanController extends Controller
         }
 
         // Check authorization
-        if (auth()->id() !== $permohonan->user_id && auth()->user()->role !== 'operator' && auth()->user()->role !== 'admin') {
+        if (auth()->id() !== $permohonan->user_id && !auth()->user()->hasAnyRole(['operator', 'admin'])) {
             abort(403, 'Unauthorized');
         }
 
@@ -226,7 +226,7 @@ class SuratPernyataanController extends Controller
         }
 
         // Check authorization
-        if (auth()->id() !== $permohonan->user_id && auth()->user()->role !== 'operator' && auth()->user()->role !== 'admin') {
+        if (auth()->id() !== $permohonan->user_id && !auth()->user()->hasAnyRole(['operator', 'admin'])) {
             abort(403, 'Unauthorized');
         }
 
