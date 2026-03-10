@@ -188,7 +188,7 @@
             border: 1px solid rgba(2, 132, 199, 0.1);
             border-radius: var(--radius-card);
             box-shadow: var(--shadow-sm);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.2, 1);
+            transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.2, 1), transform 0.3s cubic-bezier(0.16, 1, 0.2, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.2, 1);
             overflow: hidden;
             background: white;
         }
