@@ -58,6 +58,35 @@ Route::middleware('auth')->group(function () {
         Route::get('dashboard/reklame-chart', [DashboardController::class, 'reklameChart'])->name('dashboard.reklame-chart');
     });
 
+    // TEST ROUTE - Diagnose role checking issue
+    Route::get('/test-role-check', function () {
+        $user = auth()->user();
+        $output = "=== Role Check Diagnostic ===" . PHP_EOL . PHP_EOL;
+        $output .= "User ID: " . $user->id . PHP_EOL;
+        $output .= "User Email: " . $user->email . PHP_EOL;
+        $output .= "User role_id (from DB): " . $user->role_id . PHP_EOL;
+        $output .= "Role relation loaded: " . ($user->relationLoaded('role') ? 'YES' : 'NO') . PHP_EOL;
+        
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+            $output .= "Loaded role relation" . PHP_EOL;
+        }
+        
+        $output .= "Role object: " . ($user->role ? 'LOADED' : 'NULL') . PHP_EOL;
+        if ($user->role) {
+            $output .= "Role ID: " . $user->role->id . PHP_EOL;
+            $output .= "Role Name: " . $user->role->name . PHP_EOL;
+            $output .= "Role Slug: " . $user->role->slug . PHP_EOL;
+        }
+        
+        $requiredRoles = ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'];
+        $output .= PHP_EOL . "Testing hasAnyRole with: " . implode(', ', $requiredRoles) . PHP_EOL;
+        $result = $user->hasAnyRole($requiredRoles);
+        $output .= "Result: " . ($result ? 'TRUE (PASS)' : 'FALSE (FAIL)') . PHP_EOL;
+        
+        return response($output, 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+    });
+
     // Permohonan Reklame Routes (untuk Pemohon only)
     Route::middleware('role:pemohon')->group(function () {
         Route::get('permohonan', [PermohonanReklameController::class, 'index'])->name('permohonan.index');
@@ -147,6 +176,11 @@ Route::middleware('auth')->group(function () {
         Route::get('permohonan/{permohonan}/requirements/check', [DocumentRequirementController::class, 'viewForStaff'])->name('document-requirements.check');
         Route::patch('requirements/{requirement}/status', [DocumentRequirementController::class, 'updateStatus'])->name('document-requirements.update-status');
         Route::post('permohonan/{permohonan}/requirements/approve-all', [DocumentRequirementController::class, 'approveAllDocuments'])->name('document-requirements.approve-all');
+        
+        // TEST ROUTE - Inside role middleware
+        Route::get('/test-role-protected', function () {
+            return response("SUCCESS! You passed the role:operator,kepala_seksi,kepala_bidang,admin middleware!", 200, ['Content-Type' => 'text/plain; charset=utf-8']);
+        });
     });
 
     Route::get('requirements/{requirement}/download', [DocumentRequirementController::class, 'download'])->name('document-requirements.download');
