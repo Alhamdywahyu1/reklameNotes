@@ -390,35 +390,37 @@
 
     <!-- Sidebar Info -->
     <div class="col-lg-3">
-        <div class="card info-sidebar sticky-top" style="top: 20px;">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Info Permohonan</h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <small class="text-muted d-block">No. Registrasi</small>
-                    <strong>{{ $permohonan->nomor_registrasi }}</strong>
+        <div style="position: sticky; top: 20px; z-index: 10;">
+            <div class="card info-sidebar">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> Info Permohonan</h6>
                 </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Nama Pemohon</small>
-                    <strong>{{ $permohonan->nama_pemohon }}</strong>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">NIK</small>
-                    <strong>{{ $permohonan->nik }}</strong>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Jenis Reklame</small>
-                    <span class="badge bg-info">{{ $permohonan->jenis_reklame }}</span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Status</small>
-                    <span class="badge bg-primary">{{ $permohonan->status }}</span>
-                </div>
-                <hr>
-                <div class="mb-0">
-                    <small class="text-muted d-block">Tanggal Pengajuan</small>
-                    <strong>{{ $permohonan->created_at->format('d M Y H:i') }}</strong>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted d-block">No. Registrasi</small>
+                        <strong>{{ $permohonan->nomor_registrasi }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Nama Pemohon</small>
+                        <strong>{{ $permohonan->nama_pemohon }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">NIK</small>
+                        <strong>{{ $permohonan->nik }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Jenis Reklame</small>
+                        <span class="badge bg-info">{{ $permohonan->jenis_reklame }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Status</small>
+                        <span class="badge bg-primary">{{ $permohonan->status }}</span>
+                    </div>
+                    <hr>
+                    <div class="mb-0">
+                        <small class="text-muted d-block">Tanggal Pengajuan</small>
+                        <strong>{{ $permohonan->created_at->format('d M Y H:i') }}</strong>
+                    </div>
                 </div>
             </div>
         </div>

@@ -391,49 +391,50 @@
 
     <!-- Sidebar Info -->
     <div class="col-lg-4">
-        <div class="card sticky-top" style="top: 20px;">
-            <div class="card-body">
-                <h5><i class="bi bi-info-circle"></i> Informasi</h5>
-                <hr>
-                <div class="mb-3">
-                    <small class="text-muted d-block mb-1">Status</small>
-                    <span class="badge" style="background-color: 
-                        @if($permohonan->status === 'Disetujui Kepala Bidang') #28a745
-                        @elseif($permohonan->status === 'Ditolak Operator' || $permohonan->status === 'Ditolak Kepala Seksi') #dc3545
-                        @else #17a2b8 @endif
-                        ">
-                        {{ $permohonan->status }}
-                    </span>
-                </div>
-
-                @if ($permohonan->keterangan_penolakan)
-                    <div class="alert alert-danger small py-2 px-3 mb-3">
-                        <strong>Keterangan Penolakan:</strong><br>
-                        {{ $permohonan->keterangan_penolakan }}
+        <div style="position: sticky; top: 20px; z-index: 10;">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="bi bi-info-circle"></i> Informasi</h5>
+                    <hr>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Status</small>
+                        <span class="badge" style="background-color: 
+                            @if($permohonan->status === 'Disetujui Kepala Bidang') #28a745
+                            @elseif($permohonan->status === 'Ditolak Operator' || $permohonan->status === 'Ditolak Kepala Seksi') #dc3545
+                            @else #17a2b8 @endif
+                            ">
+                            {{ $permohonan->status }}
+                        </span>
                     </div>
-                @endif
 
-                <div class="mb-3">
-                    <small class="text-muted d-block mb-1">Nomor Registrasi</small>
-                    <strong>{{ $permohonan->nomor_registrasi }}</strong>
-                </div>
+                    @if ($permohonan->keterangan_penolakan)
+                        <div class="alert alert-danger small py-2 px-3 mb-3">
+                            <strong>Keterangan Penolakan:</strong><br>
+                            {{ $permohonan->keterangan_penolakan }}
+                        </div>
+                    @endif
 
-                <div class="mb-3">
-                    <small class="text-muted d-block mb-1">Pemohon</small>
-                    <span>{{ $permohonan->nama_pemohon }}</span>
-                </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Nomor Registrasi</small>
+                        <strong>{{ $permohonan->nomor_registrasi }}</strong>
+                    </div>
 
-                <div class="mb-3">
-                    <small class="text-muted d-block mb-1">Tanggal Dibuat</small>
-                    <span>{{ $permohonan->created_at->format('d M Y') }}</span>
-                </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Pemohon</small>
+                        <span>{{ $permohonan->nama_pemohon }}</span>
+                    </div>
 
-                <div class="mb-0">
-                    <small class="text-muted d-block mb-1">Terakhir Diperbarui</small>
-                    <span>{{ $permohonan->updated_at->format('d M Y H:i') }}</span>
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1">Tanggal Dibuat</small>
+                        <span>{{ $permohonan->created_at->format('d M Y') }}</span>
+                    </div>
+
+                    <div class="mb-0">
+                        <small class="text-muted d-block mb-1">Terakhir Diperbarui</small>
+                        <span>{{ $permohonan->updated_at->format('d M Y H:i') }}</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <!-- Audit Trail / Activity Log -->
         <div class="card mt-3">

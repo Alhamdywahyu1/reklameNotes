@@ -251,28 +251,30 @@
 
     <!-- Sidebar Info -->
     <div class="col-lg-4">
-        <div class="card sticky-top" style="top: 20px;">
-            <div class="card-body">
-                <h6 class="card-title mb-3">
-                    <i class="bi bi-info-circle-fill text-primary"></i> Informasi Permohonan
-                </h6>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Nomor Registrasi</small>
-                    <strong>{{ $permohonan->nomor_registrasi }}</strong>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Status</small>
-                    <span class="badge bg-{{ $permohonan->status == 'approved' ? 'success' : 'warning' }}">
-                        {{ ucfirst($permohonan->status) }}
-                    </span>
-                </div>
-                <div class="mb-3">
-                    <small class="text-muted d-block">Jenis Reklame</small>
-                    <strong>{{ ucfirst(str_replace('_', ' ', $permohonan->jenis_reklame)) }}</strong>
-                </div>
-                <div>
-                    <small class="text-muted d-block">Lokasi</small>
-                    <strong>{{ $permohonan->lokasi_pemasangan }}</strong>
+        <div style="position: sticky; top: 20px; z-index: 10;">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">
+                        <i class="bi bi-info-circle-fill text-primary"></i> Informasi Permohonan
+                    </h6>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Nomor Registrasi</small>
+                        <strong>{{ $permohonan->nomor_registrasi }}</strong>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Status</small>
+                        <span class="badge bg-{{ $permohonan->status == 'approved' ? 'success' : 'warning' }}">
+                            {{ ucfirst($permohonan->status) }}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Jenis Reklame</small>
+                        <strong>{{ ucfirst(str_replace('_', ' ', $permohonan->jenis_reklame)) }}</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block">Lokasi</small>
+                        <strong>{{ $permohonan->lokasi_pemasangan }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
