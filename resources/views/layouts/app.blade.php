@@ -192,6 +192,11 @@
             background: white;
         }
 
+        /* Allow sticky positioning on cards */
+        .card.sticky-top {
+            overflow: visible;
+        }
+
         .card:not(:has(canvas)):hover {
             box-shadow: var(--shadow-hover);
             transform: translateY(-2px);
