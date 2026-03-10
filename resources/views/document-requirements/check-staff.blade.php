@@ -131,7 +131,9 @@
         <div class="d-flex gap-2">
             @if(auth()->user()->hasRole('operator') && !$requirements->isEmpty())
                 @php
-                    $allApproved = $requirements->every(fn($r) => $r->status === 'Lengkap');
+                    $allApproved = $requirements
+                        ->filter(fn($r) => $r->jenis_persyaratan !== 'Surat Kuasa')
+                        ->every(fn($r) => $r->status === 'Lengkap');
                 @endphp
                 @if($allApproved && $permohonan->canBeApprovedByOperator())
                     <a href="{{ route('approval.verify', $permohonan) }}" class="btn btn-success">
