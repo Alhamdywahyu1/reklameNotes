@@ -66,24 +66,24 @@
 <div class="row">
     <!-- Pie Chart -->
     <div class="col-lg-6 mb-4">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm chart-card">
             <div class="card-header bg-light">
                 <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Perbandingan Jenis Reklame</h5>
             </div>
             <div class="card-body">
-                <canvas id="pieChart" height="80"></canvas>
+                <div class="chart-container"><canvas id="pieChart"></canvas></div>
             </div>
         </div>
     </div>
 
     <!-- Bar Chart -->
     <div class="col-lg-6 mb-4">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm chart-card">
             <div class="card-header bg-light">
                 <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Distribusi Jenis Reklame</h5>
             </div>
             <div class="card-body">
-                <canvas id="barChart" height="80"></canvas>
+                <div class="chart-container"><canvas id="barChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -92,12 +92,12 @@
 <!-- Top Locations -->
 <div class="row">
     <div class="col-lg-12 mb-4">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm chart-card">
             <div class="card-header bg-light">
                 <h5 class="mb-0"><i class="bi bi-geo-alt"></i> 10 Lokasi Pemasangan Terbanyak</h5>
             </div>
             <div class="card-body">
-                <canvas id="locationChart" height="60"></canvas>
+                <div class="chart-container"><canvas id="locationChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -168,6 +168,7 @@
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            resizeDelay: 200,
             plugins: {
                 legend: {
                     position: 'bottom',
@@ -217,6 +218,7 @@
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: true,
+            resizeDelay: 200,
             plugins: {
                 legend: {
                     display: false
@@ -258,6 +260,7 @@
         options: {
             responsive: true,
             maintainAspectRatio: true,
+            resizeDelay: 200,
             plugins: {
                 legend: {
                     position: 'top'
@@ -278,6 +281,21 @@
 <style>
     .card {
         border-radius: 0.5rem;
+    }
+
+    .chart-card {
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .chart-card:hover {
+        transform: none !important;
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
     }
 
     .header-page {
