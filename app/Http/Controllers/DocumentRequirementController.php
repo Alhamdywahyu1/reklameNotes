@@ -126,8 +126,14 @@ class DocumentRequirementController extends Controller
      */
     public function viewForStaff(PermohonanReklame $permohonan): View
     {
+        // Ensure user and role are loaded
+        $user = auth()->user();
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+
         // Cek otorisasi hanya untuk staff
-        if (!auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
+        if (!$user->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
             abort(403, 'Hanya staff yang dapat mengakses halaman ini');
         }
 

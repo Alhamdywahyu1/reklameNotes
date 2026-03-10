@@ -57,6 +57,16 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Boot the model - eager load role relationship
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('with_role', function ($query) {
+            $query->with('role');
+        });
+    }
+
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
