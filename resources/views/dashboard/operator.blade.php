@@ -124,14 +124,9 @@
                                         <td>{{ Str::limit($item->lokasi_pemasangan, 25) }}</td>
                                         <td>{{ $item->created_at->format('d M Y') }}</td>
                                         <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success" title="Periksa Dokumen">
-                                                    <i class="bi bi-file-earmark-check"></i>
-                                                </a>
-                                                <a href="{{ route('approval.verify', $item) }}" class="btn btn-primary" title="Verifikasi">
-                                                    <i class="bi bi-check-circle"></i>
-                                                </a>
-                                            </div>
+                                            <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success btn-sm" title="Periksa Dokumen">
+                                                <i class="bi bi-file-earmark-check"></i> Periksa Dokumen
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -174,14 +169,9 @@
                                         <td>{{ Str::limit($item->lokasi_pemasangan, 25) }}</td>
                                         <td>{{ $item->updated_at->format('d M Y') }}</td>
                                         <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success" title="Periksa Dokumen">
-                                                    <i class="bi bi-file-earmark-check"></i>
-                                                </a>
-                                                <a href="{{ route('approval.verify', $item) }}" class="btn btn-primary" title="Verifikasi Revisi">
-                                                    <i class="bi bi-check-circle"></i>
-                                                </a>
-                                            </div>
+                                            <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success btn-sm" title="Periksa Dokumen">
+                                                <i class="bi bi-file-earmark-check"></i> Periksa Dokumen
+                                            </a>
                                         </td>
                                     </tr>
                                 @endforeach

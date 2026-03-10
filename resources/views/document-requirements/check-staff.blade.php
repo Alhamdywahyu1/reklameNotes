@@ -319,8 +319,9 @@
                                     </div>
 
                                     <div class="mb-3 catatan-section" style="display: none;">
-                                        <label class="form-label fw-semibold">Catatan Penolakan</label>
-                                        <textarea name="catatan_penolakan" class="form-control" rows="3" placeholder="Jelaskan alasan penolakan dokumen ini...">{{ $requirement->catatan_penolakan }}</textarea>
+                                        <label class="form-label fw-semibold">Alasan Penolakan <span class="text-danger">*</span></label>
+                                        <textarea name="catatan_penolakan" class="form-control catatan-textarea" rows="3" placeholder="Jelaskan alasan penolakan dokumen ini..." required>{{ $requirement->catatan_penolakan }}</textarea>
+                                        <div class="form-text text-danger">Wajib diisi jika status Ditolak</div>
                                     </div>
                                 </div>
 
@@ -335,37 +336,6 @@
                     </div>
                 </div>
 
-                <!-- Modal untuk penolakan cepat -->
-                <div class="modal fade" id="rejectModal{{ $requirement->id }}" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title"><i class="bi bi-x-circle"></i> Tolak Dokumen</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form action="{{ route('document-requirements.update-status', $requirement) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="Ditolak">
-                                
-                                <div class="modal-body">
-                                    <p class="mb-3">Anda akan menolak dokumen: <strong>{{ $requirement->jenis_persyaratan }}</strong></p>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold">Alasan Penolakan <span class="text-danger">*</span></label>
-                                        <textarea name="catatan_penolakan" class="form-control" rows="3" placeholder="Jelaskan alasan penolakan dokumen ini..." required>{{ $requirement->catatan_penolakan }}</textarea>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="bi bi-x-circle"></i> Tolak Dokumen
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
                 @endforeach
             </div>
         @endif
@@ -416,11 +386,17 @@
         select.addEventListener('change', function() {
             const modal = this.closest('.modal-content');
             const catatanSection = modal.querySelector('.catatan-section');
+            const catatanTextarea = modal.querySelector('.catatan-textarea');
             
             if (this.value === 'Ditolak') {
                 catatanSection.style.display = 'block';
+                if (catatanTextarea) catatanTextarea.required = true;
             } else {
                 catatanSection.style.display = 'none';
+                if (catatanTextarea) {
+                    catatanTextarea.required = false;
+                    catatanTextarea.value = '';
+                }
             }
         });
 

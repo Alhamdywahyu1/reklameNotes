@@ -225,7 +225,7 @@ class DocumentRequirementController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:Belum Lengkap,Lengkap,Ditolak',
-            'catatan_penolakan' => 'nullable|string|max:500',
+            'catatan_penolakan' => 'required_if:status,Ditolak|nullable|string|max:500',
         ]);
 
         $oldStatus = $requirement->status;
