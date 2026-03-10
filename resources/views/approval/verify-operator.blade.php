@@ -15,57 +15,6 @@
                 <form method="POST" action="{{ route('approval.verify.store', $permohonan) }}">
                     @csrf
 
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-file-earmark-check"></i> Checklist Persyaratan</h5>
-                    
-                    <div class="table-responsive">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Persyaratan</th>
-                                    <th>Lengkap?</th>
-                                    <th>Keterangan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($persyaratan as $item)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>
-                                            <strong>{{ $item->jenis_persyaratan }}</strong>
-                                            @if ($item->file_dokumen)
-                                                <br>
-                                                <a href="{{ asset('storage/' . $item->file_dokumen) }}" target="_blank" class="small btn-link">
-                                                    <i class="bi bi-download"></i> Lihat File
-                                                </a>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <input type="hidden" name="persyaratan[{{ $item->id }}][jenis_persyaratan]" value="{{ $item->jenis_persyaratan }}">
-                                            <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" 
-                                                    name="persyaratan[{{ $item->id }}][is_lengkap]" 
-                                                    value="1" 
-                                                    id="persyaratan_{{ $item->id }}"
-                                                    @if($item->is_lengkap) checked @endif>
-                                                <label class="form-check-label" for="persyaratan_{{ $item->id }}">
-                                                    Lengkap
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <textarea class="form-control form-control-sm" 
-                                                name="persyaratan[{{ $item->id }}][keterangan]" 
-                                                rows="2" placeholder="Keterangan...">{{ $item->keterangan }}</textarea>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <hr>
-
                     <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-pencil-square"></i> Keputusan</h5>
 
                     <div class="mb-3">
