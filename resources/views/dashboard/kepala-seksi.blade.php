@@ -97,14 +97,9 @@
                                     <span class="badge bg-warning text-dark">{{ $item->status }}</span>
                                 </td>
                                 <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success" title="Periksa Dokumen">
-                                            <i class="bi bi-file-earmark-check"></i>
-                                        </a>
-                                        <a href="{{ route('approval.approve-seksi', $item) }}" class="btn btn-primary" title="Approve">
-                                            <i class="bi bi-check-circle"></i>
-                                        </a>
-                                    </div>
+                                    <a href="{{ route('document-requirements.check', $item) }}" class="btn btn-success btn-sm" title="Periksa Dokumen">
+                                        <i class="bi bi-file-earmark-check"></i> Periksa Dokumen
+                                    </a>
                                 </td>
                             </tr>
                         @endforeach
