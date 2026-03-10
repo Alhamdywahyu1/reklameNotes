@@ -70,11 +70,15 @@
 
                                         @php
                                             // Logika status:
+                                            // - Draft: permohonan masih draft (belum diajukan)
                                             // - Lengkap: sudah diverifikasi dan disetujui
                                             // - Ditolak: sudah diverifikasi dan ditolak
-                                            // - Dalam Peninjauan: file sudah ada tapi belum dicheck
+                                            // - Dalam Peninjauan: permohonan sudah diajukan dan file ada tapi belum dicheck
                                             // - Belum Lengkap: file belum diupload
-                                            if ($req->status === 'Lengkap') {
+                                            if ($permohonan->status === 'Draft') {
+                                                $displayStatus = 'Draft';
+                                                $statusClass = 'badge bg-secondary';
+                                            } elseif ($req->status === 'Lengkap') {
                                                 $displayStatus = 'Lengkap';
                                                 $statusClass = 'badge bg-success';
                                             } elseif ($req->status === 'Ditolak') {

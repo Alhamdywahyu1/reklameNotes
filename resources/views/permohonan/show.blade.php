@@ -262,11 +262,15 @@
                                     <td>
                                         @php
                                             // Logika status:
+                                            // - Draft: permohonan masih draft (belum diajukan)
                                             // - Lengkap: sudah diverifikasi dan disetujui
                                             // - Ditolak: sudah diverifikasi dan ditolak
-                                            // - Dalam Peninjauan: file sudah ada tapi belum dicheck
+                                            // - Dalam Peninjauan: permohonan sudah diajukan dan file ada tapi belum dicheck
                                             // - Belum Lengkap: file belum diupload
-                                            if ($item->status === 'Lengkap') {
+                                            if ($permohonan->status === 'Draft') {
+                                                $displayStatus = 'Draft';
+                                                $statusClass = 'bg-secondary';
+                                            } elseif ($item->status === 'Lengkap') {
                                                 $displayStatus = 'Lengkap';
                                                 $statusClass = 'bg-success';
                                             } elseif ($item->status === 'Ditolak') {
