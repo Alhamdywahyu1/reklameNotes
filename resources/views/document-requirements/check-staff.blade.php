@@ -129,10 +129,6 @@
             <p class="text-muted">{{ $permohonan->nomor_registrasi }} - {{ $permohonan->nama_pemohon }}</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Kembali ke Detail
-            </a>
-            
             @if(auth()->user()->hasRole('operator') && !$requirements->isEmpty())
                 @php
                     $allApproved = $requirements->every(fn($r) => $r->status === 'Lengkap');
