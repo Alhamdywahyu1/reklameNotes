@@ -19,7 +19,13 @@ class CheckRole
             return redirect('login');
         }
 
-        if (!auth()->user()->hasAnyRole($roles)) {
+        // Reload user with role relationship to ensure role is loaded
+        $user = auth()->user();
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+
+        if (!$user->hasAnyRole($roles)) {
             abort(403, 'Unauthorized access');
         }
 
