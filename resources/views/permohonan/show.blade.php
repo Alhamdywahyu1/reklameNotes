@@ -408,9 +408,9 @@
                     </div>
 
                     @if ($permohonan->keterangan_penolakan)
-                        <div class="alert alert-danger small py-2 px-3 mb-3">
-                            <strong>Keterangan Penolakan:</strong><br>
-                            {{ $permohonan->keterangan_penolakan }}
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">Keterangan Penolakan</small>
+                            <span class="text-danger">{{ $permohonan->keterangan_penolakan }}</span>
                         </div>
                     @endif
 
