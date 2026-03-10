@@ -194,7 +194,11 @@
 
         /* Allow sticky positioning on cards */
         .card.sticky-top {
-            overflow: visible;
+            overflow: visible !important;
+            position: sticky !important;
+            top: 20px;
+            height: max-content;
+            z-index: 10;
         }
 
         .card:not(:has(canvas)):hover {
