@@ -190,8 +190,8 @@ class PermohonanReklameController extends Controller
             'created_at' => now(),
         ]);
 
-        return redirect()->route('permohonan.editStep2', $permohonan)
-            ->with('success', 'Permohonan berhasil dibuat dengan nomor: ' . $permohonan->nomor_registrasi . '. Silakan lanjutkan mengisi form pendaftaran step 2.');
+        return redirect()->route('permohonan.show', $permohonan)
+            ->with('success', 'Permohonan berhasil dibuat dengan nomor: ' . $permohonan->nomor_registrasi . '. Silakan lengkapi data yang diperlukan.');
     }
 
     /**
@@ -398,66 +398,6 @@ class PermohonanReklameController extends Controller
             ->with('success', 'Permohonan berhasil dihapus');
     }
 
-    /**
-     * Show form for step 2 (form pendaftaran ke-2)
-     */
-    public function editStep2(PermohonanReklame $permohonan): View
-    {
-        // Check authorization
-        if ($permohonan->user_id !== auth()->id()) {
-            abort(403, 'Anda tidak memiliki akses untuk mengisi form ini');
-        }
-
-        // Only allow if permohonan is in Draft status and form_step is 1
-        if ($permohonan->status !== 'Draft' || $permohonan->form_step > 1) {
-            abort(403, 'Permohonan tidak dapat diakses pada tahap ini');
-        }
-
-        return view('permohonan.step2', compact('permohonan'));
-    }
-
-    /**
-     * Store form step 2 data
-     */
-    public function updateStep2(Request $request, PermohonanReklame $permohonan): RedirectResponse
-    {
-        // Check authorization
-        if ($permohonan->user_id !== auth()->id()) {
-            abort(403, 'Anda tidak memiliki akses untuk mengisi form ini');
-        }
-
-        if ($permohonan->status !== 'Draft' || $permohonan->form_step > 1) {
-            return redirect()->route('permohonan.show', $permohonan)
-                ->with('error', 'Permohonan tidak dapat diakses pada tahap ini');
-        }
-
-        $validated = $request->validate([
-            'pekerjaan' => 'required|string|max:255',
-            'status_reklame' => 'required|in:Baru,Perpanjangan',
-            'nama_reklame' => 'required|string|max:255',
-            'alamat_perusahaan' => 'required|string',
-            'jumlah_warna' => 'required|integer|min:1',
-            'rata_rata' => 'required|string|max:255',
-            'masa_berlaku' => 'required|date',
-        ]);
-
-        $permohonan->update(array_merge($validated, ['form_step' => 2]));
-
-        // Log activity
-        ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'UPDATE',
-            'model_type' => 'PermohonanReklame',
-            'model_id' => $permohonan->id,
-            'description' => "Melengkapi form pendaftaran step 2: {$permohonan->nomor_registrasi}",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'created_at' => now(),
-        ]);
-
-        return redirect()->route('permohonan.editStep3', $permohonan)
-            ->with('success', 'Form step 2 berhasil disimpan. Lanjutkan ke step 3 - Surat Pernyataan');
-    }
 
     /**
      * Download dokumen file.
