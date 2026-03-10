@@ -97,7 +97,7 @@
                 <h5 class="mb-0"><i class="bi bi-geo-alt"></i> 10 Lokasi Pemasangan Terbanyak</h5>
             </div>
             <div class="card-body">
-                <div class="chart-container"><canvas id="locationChart"></canvas></div>
+                <div class="chart-container-lg"><canvas id="locationChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -167,7 +167,7 @@
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             resizeDelay: 200,
             plugins: {
                 legend: {
@@ -217,7 +217,7 @@
         options: {
             indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             resizeDelay: 200,
             plugins: {
                 legend: {
@@ -259,7 +259,7 @@
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             resizeDelay: 200,
             plugins: {
                 legend: {
@@ -296,6 +296,13 @@
     .chart-container {
         position: relative;
         width: 100%;
+        height: 300px;
+    }
+
+    .chart-container-lg {
+        position: relative;
+        width: 100%;
+        height: 350px;
     }
 
     .header-page {
