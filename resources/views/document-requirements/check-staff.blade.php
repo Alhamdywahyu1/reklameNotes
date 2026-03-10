@@ -390,7 +390,7 @@
 
     <!-- Sidebar Info -->
     <div class="col-lg-3">
-        <div class="card info-sidebar">
+        <div class="card info-sidebar sticky-top" style="top: 20px;">
             <div class="card-header">
                 <h6 class="mb-0"><i class="bi bi-info-circle"></i> Info Permohonan</h6>
             </div>

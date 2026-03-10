@@ -251,7 +251,7 @@
 
     <!-- Sidebar Info -->
     <div class="col-lg-4">
-        <div class="card">
+        <div class="card sticky-top" style="top: 20px;">
             <div class="card-body">
                 <h6 class="card-title mb-3">
                     <i class="bi bi-info-circle-fill text-primary"></i> Informasi Permohonan
