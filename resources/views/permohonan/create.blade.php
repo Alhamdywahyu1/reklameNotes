@@ -139,7 +139,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="latitude" class="form-label">Latitude <span class="text-danger">*</span></label>
                             <input type="number" class="form-control @error('latitude') is-invalid @enderror" 
-                                id="latitude" name="latitude" step="0.0000001" placeholder="-6.200000" 
+                                id="latitude" name="latitude" step="any" placeholder="-6.200000" 
                                 value="{{ old('latitude') }}" required>
                             <small class="text-muted d-block mt-1">Format: -6.123456 (negativ untuk Selatan)</small>
                             @error('latitude')
@@ -149,7 +149,7 @@
                         <div class="col-md-6 mb-3">
                             <label for="longitude" class="form-label">Longitude <span class="text-danger">*</span></label>
                             <input type="number" class="form-control @error('longitude') is-invalid @enderror" 
-                                id="longitude" name="longitude" step="0.0000001" placeholder="106.816666" 
+                                id="longitude" name="longitude" step="any" placeholder="106.816666" 
                                 value="{{ old('longitude') }}" required>
                             <small class="text-muted d-block mt-1">Format: 106.123456 (positif untuk Timur)</small>
                             @error('longitude')
