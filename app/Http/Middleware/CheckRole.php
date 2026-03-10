@@ -15,37 +15,65 @@ class CheckRole
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        // Log the initial check
-        \Log::debug('CheckRole Middleware - Request path: ' . $request->getPathInfo());
-        \Log::debug('CheckRole Middleware - Required roles: ' . implode(',', $roles));
-        
+        // Step 1: Check authentication
         if (!auth()->check()) {
-            \Log::warning('CheckRole Middleware - User not authenticated');
+            \Log::warning('CheckRole: User not authenticated, redirecting to login');
             return redirect('login');
         }
 
-        // Reload user with role relationship to ensure role is loaded
+        // Step 2: Get user and verify it exists
         $user = auth()->user();
-        \Log::debug('CheckRole Middleware - User ID: ' . $user->id . ', Email: ' . $user->email);
-        
-        if (!$user->relationLoaded('role')) {
-            \Log::debug('CheckRole Middleware - Role not loaded, calling load()');
-            $user->load('role');
-        } else {
-            \Log::debug('CheckRole Middleware - Role already loaded');
-        }
-        
-        \Log::debug('CheckRole Middleware - User role_id: ' . $user->role_id . ', Role slug: ' . ($user->role?->slug ?? 'NULL'));
-        
-        $hasRole = $user->hasAnyRole($roles);
-        \Log::debug('CheckRole Middleware - hasAnyRole result: ' . ($hasRole ? 'TRUE' : 'FALSE'));
-        
-        if (!$hasRole) {
-            \Log::warning('CheckRole Middleware - Access denied for user ' . $user->email . ' (role: ' . ($user->role?->slug ?? 'NULL') . ')');
-            abort(403, 'Unauthorized access');
+        if (!$user) {
+            \Log::warning('CheckRole: auth()->user() returned null despite auth()->check() being true');
+            return redirect('login');
         }
 
-        \Log::debug('CheckRole Middleware - Access granted');
+        \Log::debug('CheckRole: User authenticated', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'role_id' => $user->role_id,
+        ]);
+
+        // Step 3: Ensure role relationship is loaded from database
+        // Even if cached in session, force reload to get latest data
+        if ($user->relationLoaded('role')) {
+            \Log::debug('CheckRole: Role already loaded');
+            $roleSlug = $user->role?->slug;
+        } else {
+            \Log::debug('CheckRole: Loading role relationship');
+            $user->load('role');
+            $roleSlug = $user->role?->slug;
+        }
+
+        \Log::debug('CheckRole: Role check', [
+            'required_roles' => $roles,
+            'user_role_slug' => $roleSlug,
+            'role_id' => $user->role_id,
+        ]);
+
+        // Step 4: Check if user has required role
+        if (empty($roles)) {
+            \Log::warning('CheckRole: No roles specified in middleware');
+            abort(403, 'No roles specified');
+        }
+
+        // Explicit check - user role must be one of the required roles
+        if (!in_array($roleSlug, $roles, true)) {
+            \Log::warning('CheckRole: User does not have required role', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'role_slug' => $roleSlug,
+                'required_roles' => $roles,
+            ]);
+            abort(403, 'You do not have permission to access this resource');
+        }
+
+        \Log::debug('CheckRole: Access granted', [
+            'user_id' => $user->id,
+            'role_slug' => $roleSlug,
+        ]);
+
         return $next($request);
     }
 }
+

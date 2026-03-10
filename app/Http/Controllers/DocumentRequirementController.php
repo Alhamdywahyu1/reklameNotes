@@ -126,28 +126,36 @@ class DocumentRequirementController extends Controller
      */
     public function viewForStaff(PermohonanReklame $permohonan): View
     {
-        \Log::debug('DocumentRequirementController::viewForStaff - Called for permohonan ID: ' . $permohonan->id);
-        
-        // Ensure user and role are loaded
         $user = auth()->user();
-        \Log::debug('DocumentRequirementController::viewForStaff - User ID: ' . $user->id . ', Email: ' . $user->email);
         
+        \Log::debug('DocumentRequirementController::viewForStaff', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'role_id' => $user->role_id,
+        ]);
+        
+        // Ensure role is loaded
         if (!$user->relationLoaded('role')) {
-            \Log::debug('DocumentRequirementController::viewForStaff - Role not loaded, calling load()');
+            \Log::debug('DocumentRequirementController::viewForStaff: Loading role');
             $user->load('role');
-        } else {
-            \Log::debug('DocumentRequirementController::viewForStaff - Role already loaded');
         }
-
-        \Log::debug('DocumentRequirementController::viewForStaff - User role_slug: ' . ($user->role?->slug ?? 'NULL'));
         
-        // Cek otorisasi hanya untuk staff
-        if (!$user->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
-            \Log::warning('DocumentRequirementController::viewForStaff - Access denied for user ' . $user->email);
+        $roleSlug = $user->role?->slug;
+        \Log::debug('DocumentRequirementController::viewForStaff: Role check', [
+            'role_slug' => $roleSlug,
+        ]);
+
+        // Explicit role check - must be one of: operator, kepala_seksi, kepala_bidang, admin
+        $allowedRoles = ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'];
+        if (!in_array($roleSlug, $allowedRoles, true)) {
+            \Log::warning('DocumentRequirementController::viewForStaff: Access denied', [
+                'user_id' => $user->id,
+                'role_slug' => $roleSlug,
+            ]);
             abort(403, 'Hanya staff yang dapat mengakses halaman ini');
         }
 
-        \Log::debug('DocumentRequirementController::viewForStaff - Access granted, fetching requirements');
+        \Log::debug('DocumentRequirementController::viewForStaff: Access granted');
         
         $requirements = $permohonan->documentRequirements()->get();
 
