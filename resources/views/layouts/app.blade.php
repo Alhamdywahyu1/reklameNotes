@@ -13,6 +13,7 @@
             --primary-lightest: #f0f9ff;
             --primary-soft: #e0f2fe;
             --primary-mid: #bae6fd;
+            --primary-light: #38bdf8;
             --primary: #0284c7;
             --primary-deep: #0369a1;
             --primary-dark: #075985;

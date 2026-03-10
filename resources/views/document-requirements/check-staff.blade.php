@@ -135,22 +135,17 @@
             
             @if(auth()->user()->hasRole('operator') && !$requirements->isEmpty())
                 @php
-                    $belumLengkapCount = $requirements->where('status', '!=', 'Lengkap')->count();
+                    $allApproved = $requirements->every(fn($r) => $r->status === 'Lengkap');
                 @endphp
-                @if($belumLengkapCount > 0)
-                    <form action="{{ route('document-requirements.approve-all', $permohonan) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menyetujui semua {{ $belumLengkapCount }} dokumen sekaligus?');">
-                        @csrf
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check2-all"></i> Setujui Semua Dokumen
-                        </button>
-                    </form>
+                @if($allApproved && $permohonan->canBeApprovedByOperator())
+                    <a href="{{ route('approval.verify', $permohonan) }}" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Verifikasi
+                    </a>
+                @else
+                    <button type="button" class="btn btn-success" disabled title="Semua dokumen harus disetujui terlebih dahulu">
+                        <i class="bi bi-check-circle"></i> Verifikasi
+                    </button>
                 @endif
-            @endif
-            
-            @if($permohonan->canBeApprovedByOperator() && auth()->user()->hasRole('operator'))
-                <a href="{{ route('approval.verify', $permohonan) }}" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Lanjut Verifikasi
-                </a>
             @endif
         </div>
     </div>
@@ -274,39 +269,9 @@
                             @endif
 
                             <!-- Tombol Aksi -->
-                            <div class="d-flex gap-2 mb-3">
-                                @if($requirement->file_dokumen)
-                                    @php
-                                        $ext = strtolower(pathinfo($requirement->file_dokumen, PATHINFO_EXTENSION));
-                                        $isImg = in_array($ext, ['jpg', 'jpeg', 'png', 'gif']);
-                                    @endphp
-                                    @if($isImg)
-                                        <a href="{{ route('document-requirements.preview', $requirement) }}" class="btn btn-outline-info btn-sm flex-fill" target="_blank">
-                                            <i class="bi bi-eye"></i> Preview
-                                        </a>
-                                    @else
-                                        <a href="{{ route('document-requirements.download', $requirement) }}" class="btn btn-outline-info btn-sm flex-fill" target="_blank">
-                                            <i class="bi bi-file-earmark-pdf"></i> Buka PDF
-                                        </a>
-                                    @endif
-                                @endif
-                                <button type="button" class="btn btn-primary btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#statusModal{{ $requirement->id }}">
-                                    <i class="bi bi-pencil"></i> Ubah Status
-                                </button>
-                            </div>
-
-                            <!-- Quick Actions -->
                             <div class="d-flex gap-2">
-                                <form action="{{ route('document-requirements.update-status', $requirement) }}" method="POST" class="flex-fill">
-                                    @csrf
-                                    @method('PATCH')
-                                    <input type="hidden" name="status" value="Lengkap">
-                                    <button type="submit" class="btn btn-approve btn-sm w-100" @if($requirement->status === 'Lengkap') disabled @endif>
-                                        <i class="bi bi-check"></i> Setujui
-                                    </button>
-                                </form>
-                                <button type="button" class="btn btn-reject btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $requirement->id }}" @if($requirement->status === 'Ditolak') disabled @endif>
-                                    <i class="bi bi-x"></i> Tolak
+                                <button type="button" class="btn btn-warning btn-sm w-100" data-bs-toggle="modal" data-bs-target="#statusModal{{ $requirement->id }}">
+                                    <i class="bi bi-search"></i> Periksa Dokumen
                                 </button>
                             </div>
                         </div>
@@ -326,6 +291,24 @@
                                 @method('PATCH')
                                 
                                 <div class="modal-body">
+                                    @if($requirement->file_dokumen)
+                                        @php
+                                            $modalExt = strtolower(pathinfo($requirement->file_dokumen, PATHINFO_EXTENSION));
+                                            $modalIsImg = in_array($modalExt, ['jpg', 'jpeg', 'png', 'gif']);
+                                        @endphp
+                                        <div class="mb-3">
+                                            @if($modalIsImg)
+                                                <a href="{{ route('document-requirements.preview', $requirement) }}" class="btn btn-outline-info btn-sm w-100" target="_blank">
+                                                    <i class="bi bi-eye"></i> Lihat Dokumen
+                                                </a>
+                                            @else
+                                                <a href="{{ route('document-requirements.download', $requirement) }}" class="btn btn-outline-info btn-sm w-100" target="_blank">
+                                                    <i class="bi bi-file-earmark-pdf"></i> Buka Dokumen PDF
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @endif
+
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
                                         <select name="status" class="form-select status-select" required>
