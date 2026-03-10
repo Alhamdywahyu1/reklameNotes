@@ -146,6 +146,7 @@ class PermohonanReklameController extends Controller
                 'jenis_persyaratan' => $doc['jenis'],
                 'keterangan' => $doc['desc'],
                 'is_lengkap' => false,
+                'status' => 'Draft',
             ]);
         }
 
