@@ -45,6 +45,16 @@
             line-height: 1.6;
             background-color: var(--white);
             color: var(--text-dark);
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         /* container lebih rapi di layar besar */
@@ -335,24 +345,109 @@
             font-size: 1.2rem;
         }
 
-        /* ----- FOOTER – BIRU TUA ELEGAN ----- */
+        /* ----- FOOTER MODERN (GAYA MAMIKOS TAPI DARK THEME) ----- */
         footer {
-            background: #0b3b4c;  /* biru deep kehijauan */
-            color: rgba(255,255,255,0.9);
-            padding: 3rem 0;
-            text-align: center;
-            font-size: 0.98rem;
+            background: #0b3b4c; /* biru deep kehijauan */
+            color: rgba(255,255,255,0.85); /* teks putih transparan */
+            padding: 4rem 0 0rem;
+            border-top: none;
+            font-size: 0.95rem;
+            text-align: left;
         }
-        .footer-content span {
+        
+        .footer-heading {
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #b9e6f5;
-        }
-        .footer-content i {
-            color: #9ad4e6;
-            margin-right: 4px;
+            color: #ffffff; /* teks putih tegas */
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        /* ----- RESPONSIVE TWEAKS ----- */
+        .footer-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-list li {
+            margin-bottom: 0.85rem;
+        }
+
+        .footer-list a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .footer-list a:hover {
+            color: #b9e6f5;
+        }
+
+        .footer-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .footer-socials a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            border-radius: 50%;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .footer-socials a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .store-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .store-buttons img {
+            height: 40px;
+            border-radius: 6px;
+            transition: transform 0.2s;
+        }
+
+        .store-buttons img:hover {
+            transform: scale(1.05);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 3rem;
+            padding-top: 2rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 500;
+        }
+
         @media (max-width: 992px) {
             .hero-section h1 {
                 font-size: 2.5rem;
@@ -452,6 +547,20 @@
         body {
             padding-top: 62px; /* offset for fixed navbar */
         }
+
+        /* --- FADE IN ON SCROLL --- */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            visibility: hidden;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
@@ -482,7 +591,7 @@
                         <i class="bi bi-megaphone"></i> Sistem Pendaftaran Reklame
                     </h1>
                     <p class="lead">
-                        Platform digital resmi DPMPTSP Bangkalan — pendaftaran, verifikasi, dan persetujuan reklame/baliho secara transparan, cepat, dan paperless.
+                        Platform digital resmi DPMPTSP Bangkalan pendaftaran, verifikasi, dan persetujuan reklame/baliho secara transparan, cepat, dan paperless.
                     </p>
                     <div class="d-flex flex-wrap gap-3 mt-4">
                         <a href="{{ route('login') }}" class="btn btn-primary btn-hero">
@@ -503,10 +612,10 @@
     <!-- FITUR UNGGULAN – 6 cards dengan icon biru muda -->
     <section class="features-section" id="fitur">
         <div class="container-custom">
-            <h2 class="section-title text-center">Fitur Unggulan</h2>
+            <h2 class="section-title text-center fade-in-section">Fitur Unggulan</h2>
             <div class="row g-4">
                 <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
+                    <div class="feature-card fade-in-section" style="transition-delay: 0.1s;">
                         <div class="feature-icon">
                             <i class="bi bi-file-earmark-text"></i>
                         </div>
@@ -515,7 +624,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
+                    <div class="feature-card fade-in-section" style="transition-delay: 0.2s;">
                         <div class="feature-icon">
                             <i class="bi bi-radar"></i>
                         </div>
@@ -524,7 +633,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
+                    <div class="feature-card fade-in-section" style="transition-delay: 0.3s;">
                         <div class="feature-icon">
                             <i class="bi bi-diagram-3"></i>
                         </div>
@@ -533,7 +642,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
+                    <div class="feature-card fade-in-section" style="transition-delay: 0.4s;">
                         <div class="feature-icon">
                             <i class="bi bi-cloud-arrow-up"></i>
                         </div>
@@ -542,7 +651,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
+                    <div class="feature-card fade-in-section" style="transition-delay: 0.5s;">
                         <div class="feature-icon">
                             <i class="bi bi-printer"></i>
                         </div>
@@ -551,7 +660,7 @@
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <div class="feature-card">
+                    <div class="feature-card fade-in-section" style="transition-delay: 0.6s;">
                         <div class="feature-icon">
                             <i class="bi bi-shield-lock"></i>
                         </div>
@@ -566,31 +675,31 @@
     <!-- ALUR PROSES – 4 langkah simpel -->
     <section class="process-section" id="alur">
         <div class="container-custom">
-            <h2 class="section-title text-center">Alur Proses Pendaftaran</h2>
+            <h2 class="section-title text-center fade-in-section">Alur Proses Pendaftaran</h2>
             <div class="row g-3 justify-content-center align-items-stretch">
                 <div class="col-6 col-lg-3">
-                    <div class="process-card">
+                    <div class="process-card fade-in-section" style="transition-delay: 0.1s;">
                         <div class="process-number">1</div>
                         <h5>Buat Permohonan</h5>
                         <p>Isi formulir data pemohon & detail reklame secara lengkap.</p>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="process-card">
+                    <div class="process-card fade-in-section" style="transition-delay: 0.2s;">
                         <div class="process-number">2</div>
                         <h5>Upload Dokumen</h5>
                         <p>Lampirkan dokumen sesuai checklist yang tersedia.</p>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="process-card">
+                    <div class="process-card fade-in-section" style="transition-delay: 0.3s;">
                         <div class="process-number">3</div>
                         <h5>Verifikasi</h5>
                         <p>Tim memverifikasi kelengkapan dan keabsahan data.</p>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
-                    <div class="process-card">
+                    <div class="process-card fade-in-section" style="transition-delay: 0.4s;">
                         <div class="process-number">4</div>
                         <h5>Persetujuan</h5>
                         <p>Surat resmi terbit, siap diunduh dan dicetak.</p>
@@ -605,7 +714,7 @@
         <div class="container-custom">
             <div class="row g-5">
                 <div class="col-lg-6">
-                    <div class="highlight-box">
+                    <div class="highlight-box fade-in-section" style="transition-delay: 0.1s;">
                         <h3><i class="bi bi-stars"></i> Keunggulan Platform</h3>
                         <ul class="highlight-list">
                             <li>Proses pendaftaran cepat dan mudah</li>
@@ -618,7 +727,7 @@
                     </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="highlight-box">
+                    <div class="highlight-box fade-in-section" style="transition-delay: 0.3s;">
                         <h3><i class="bi bi-file-check"></i> Persyaratan Dokumen</h3>
                         <ul class="highlight-list">
                             <li>KTP/Identitas diri pemohon</li>
@@ -634,16 +743,68 @@
         </div>
     </section>
 
-    <!-- FOOTER BIRU TUA DENGAN KESAN BERSIH -->
+    <!-- FOOTER PUTIH MODERN (GAYA MAMIKOS) -->
     <footer>
         <div class="container-custom">
-            <div class="footer-content">
-                <p class="fs-5 mb-2">
-                    <span><i class="bi bi-building"></i> DPMPTSP Bangkalan</span> · Sistem Pendaftaran Reklame
-                </p>
-                <p class="opacity-75 mb-0">
-                    &copy; {{ date('Y') }} Dinas Penanaman Modal dan Perizinan Terpadu Bangkalan. All Rights Reserved.
-                </p>
+            <div class="row g-4">
+                <!-- Kolom 1: Logo & Info -->
+                <div class="col-lg-4 mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="{{ asset('logo_bangkalan.png') }}" alt="Logo" style="height: 48px;">
+                        <span class="fs-4 fw-bold text-white" style="letter-spacing: -0.5px;">DPMPTSP</span>
+                    </div>
+                    <p class="mb-2" style="font-size: 1rem; color: rgba(255,255,255,0.85);">Dapatkan "Info Pendaftaran Reklame" terbaru hanya di Sistem Kami.</p>
+                    <p class="mb-0 fw-medium text-white">Mau "Daftar Reklame Mudah"?</p>
+                    
+                    <!-- Tombol Download -->
+                    <div class="store-buttons">
+                        <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_ENs.svg/320px-Google_Play_Store_badge_ENs.svg.png" style="height: 38px; width: auto;" alt="Google Play"></a>
+                        <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/320px-Download_on_the_App_Store_Badge.svg.png" style="height: 38px; width: auto;" alt="App Store"></a>
+                    </div>
+                </div>
+
+                <!-- Kolom 2: Menu / Informasi -->
+                <div class="col-lg-3 col-md-4 mb-4 ps-lg-4">
+                    <h5 class="footer-heading">INFORMASI</h5>
+                    <ul class="footer-list">
+                        <li><a href="#">Tentang Kami</a></li>
+                        <li><a href="#">Berita & Pengumuman</a></li>
+                        <li><a href="#">Panduan Pendaftaran</a></li>
+                        <li><a href="#">Pusat Bantuan</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 3: Kebijakan -->
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5 class="footer-heading">KEBIJAKAN</h5>
+                    <ul class="footer-list">
+                        <li><a href="#">Kebijakan Privasi</a></li>
+                        <li><a href="#">Syarat dan Ketentuan<br>Umum</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 4: Hubungi Kami -->
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <h5 class="footer-heading">HUBUNGI KAMI</h5>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-envelope"></i> dpmptsp@bangkalankab.go.id
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-whatsapp"></i> +6281325111171
+                    </div>
+                    <div class="footer-socials">
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom: Sertifikasi & Copyright -->
+            <div class="footer-bottom pb-4">
+                <div class="text-end w-100">
+                    &copy; {{ date('Y') }} DPMPTSP Bangkalan. All rights reserved
+                </div>
             </div>
         </div>
     </footer>
@@ -669,6 +830,29 @@
             } else {
                 navbar.classList.remove('scrolled');
             }
+        });
+
+        // Intersection Observer for scroll fade-in
+        document.addEventListener("DOMContentLoaded", function() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15 // elemen muncul saat 15% bagiannya masuk viewport
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // hanya animasi 1 kali
+                    }
+                });
+            }, observerOptions);
+
+            const fadeElements = document.querySelectorAll('.fade-in-section');
+            fadeElements.forEach(el => {
+                observer.observe(el);
+            });
         });
     </script>
 </body>

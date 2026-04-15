@@ -118,6 +118,20 @@
                         @enderror
                     </div>
 
+                    <div class="mb-4">
+                        <label for="keperluan_reklame" class="form-label fw-600">Reklame untuk Keperluan</label>
+                        <select class="form-select @error('keperluan_reklame') is-invalid @enderror" 
+                            id="keperluan_reklame" name="keperluan_reklame">
+                            <option value="">-- Pilih --</option>
+                            <option value="Komersial" @if(old('keperluan_reklame') === 'Komersial') selected @endif>Komersial</option>
+                            <option value="Non Komersial" @if(old('keperluan_reklame') === 'Non Komersial') selected @endif>Non Komersial</option>
+                            <option value="Sosial" @if(old('keperluan_reklame') === 'Sosial') selected @endif>Sosial</option>
+                        </select>
+                        @error('keperluan_reklame')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <hr class="my-5">
 
                     <h5 class="mb-4 pb-3 border-bottom" style="color: #1a5490;"><i class="bi bi-geo-alt"></i> Koordinat Lokasi</h5>

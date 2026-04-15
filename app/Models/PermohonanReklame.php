@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Role;
 
 class PermohonanReklame extends Model
 {
@@ -32,6 +33,8 @@ class PermohonanReklame extends Model
         'rata_rata',
         'narasi_reklame',
         'lokasi_pemasangan',
+        'klasifikasi_lokasi',
+        'keperluan_reklame',
         'latitude',
         'longitude',
         'masa_berlaku',
@@ -45,6 +48,8 @@ class PermohonanReklame extends Model
         'tanggal_berlaku',
         'tanggal_berakhir',
         'status_kedaluwarsa',
+        'rejected_by_role_id',
+        'rejected_by_user_id',
     ];
 
     protected function casts(): array
@@ -63,6 +68,16 @@ class PermohonanReklame extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function rejectedByRole(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'rejected_by_role_id');
+    }
+
+    public function rejectedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by_user_id');
     }
 
     public function persyaratanDokumen(): HasMany
@@ -143,8 +158,9 @@ class PermohonanReklame extends Model
         return match ($this->status) {
             'Draft' => 'secondary',
             'Diajukan' => 'info',
+            'Revisi Menunggu Operator', 'Revisi Menunggu Kepala Seksi' => 'warning',
             'Diverifikasi Operator' => 'warning',
-            'Ditolak Operator', 'Ditolak Kepala Seksi' => 'danger',
+            'Ditolak Operator', 'Ditolak Kepala Seksi', 'Ditolak Kepala Bidang' => 'danger',
             'Disetujui Kepala Seksi' => 'info',
             'Disetujui Kepala Bidang' => 'success',
             default => 'light',
@@ -154,8 +170,15 @@ class PermohonanReklame extends Model
     public function canBeEditedByUser(): bool
     {
         // Pemohon HANYA bisa edit jika status Draft atau Ditolak (apapun)
-        // Setelah "Diajukan", data pemohon TERKUNCI sampai permohonan ditolak
-        return in_array($this->status, ['Draft', 'Ditolak Operator', 'Ditolak Kepala Seksi', 'Ditolak Kepala Bidang']);
+        // Include Revisi Menunggu status jika sedang revisi
+        return in_array($this->status, [
+            'Draft',
+            'Ditolak Operator',
+            'Ditolak Kepala Seksi',
+            'Ditolak Kepala Bidang',
+            'Revisi Menunggu Operator',
+            'Revisi Menunggu Kepala Seksi',
+        ]);
     }
 
     public function getEditRestrictionReason(): ?string
@@ -175,18 +198,47 @@ class PermohonanReklame extends Model
 
     public function canBeApprovedByOperator(): bool
     {
-        // Operator bisa approve permohonan baru (Diajukan) dan permohonan yang direvisi (Revisi Menunggu Verifikasi)
-        return in_array($this->status, ['Diajukan', 'Revisi Menunggu Verifikasi']);
+        // Operator bisa approve permohonan baru (Diajukan) dan permohonan yang direvisi dari operator (Revisi Menunggu Operator)
+        return in_array($this->status, ['Diajukan', 'Revisi Menunggu Operator']);
     }
 
     public function canBeApprovedByKepalaSeksi(): bool
     {
-        return $this->status === 'Diverifikasi Operator';
+        // Kepala Seksi bisa approve dari operator dan revisi dari kepala seksi
+        return in_array($this->status, ['Diverifikasi Operator', 'Revisi Menunggu Kepala Seksi']);
     }
 
     public function canBeApprovedByKepalaBidang(): bool
     {
-        return $this->status === 'Disetujui Kepala Seksi';
+        // Kepala bidang bisa approve dari kepala seksi dan revisi dari kepala bidang
+        return in_array($this->status, ['Disetujui Kepala Seksi', 'Revisi Menunggu Kepala Bidang']);
+    }
+
+    /**
+     * Tentukan status revisi berdasarkan siapa yang menolak
+     */
+    public function getNextRevisionStatus(): string
+    {
+        // Jika ada rejected_by_role_id, tentukan status berdasarkan role yang menolak
+        if ($this->rejected_by_role_id) {
+            // Cek role slug
+            $rejectedRole = Role::find($this->rejected_by_role_id);
+            
+            if ($rejectedRole) {
+                if ($rejectedRole->slug === 'operator') {
+                    return 'Revisi Menunggu Operator';
+                } elseif ($rejectedRole->slug === 'kepala_seksi') {
+                    return 'Revisi Menunggu Kepala Seksi';
+                } elseif ($rejectedRole->slug === 'kepala_bidang') {
+                    return 'Revisi Menunggu Kepala Bidang';
+                } elseif ($rejectedRole->slug === 'admin') {
+                    return 'Revisi Menunggu Admin';
+                }
+            }
+        }
+        
+        // Default fallback (jarang terjadi)
+        return 'Revisi Menunggu Verifikasi';
     }
 
     public function allRequirementsComplete(): bool

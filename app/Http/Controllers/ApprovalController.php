@@ -68,6 +68,13 @@ class ApprovalController extends Controller
 
         if ($validated['keputusan'] === 'Ditolak') {
             $permohonan->keterangan_penolakan = $validated['keterangan'] ?? null;
+            // Track siapa yang menolak untuk routing revisi ke petugas yang tepat
+            $permohonan->rejected_by_role_id = auth()->user()->role_id;
+            $permohonan->rejected_by_user_id = auth()->id();
+        } else {
+            // Clear rejection tracking ketika approved
+            $permohonan->rejected_by_role_id = null;
+            $permohonan->rejected_by_user_id = null;
         }
 
         $permohonan->status = $newStatus;
@@ -149,6 +156,13 @@ class ApprovalController extends Controller
 
         if ($validated['keputusan'] === 'Ditolak') {
             $permohonan->keterangan_penolakan = $validated['keterangan'] ?? null;
+            // Track siapa yang menolak untuk routing revisi ke petugas yang tepat
+            $permohonan->rejected_by_role_id = auth()->user()->role_id;
+            $permohonan->rejected_by_user_id = auth()->id();
+        } else {
+            // Clear rejection tracking ketika approved
+            $permohonan->rejected_by_role_id = null;
+            $permohonan->rejected_by_user_id = null;
         }
 
         $permohonan->status = $newStatus;
@@ -227,11 +241,17 @@ class ApprovalController extends Controller
 
         if ($validated['keputusan'] === 'Ditolak') {
             $permohonan->keterangan_penolakan = $validated['keterangan'] ?? null;
+            $permohonan->rejected_by_role_id = auth()->user()->role_id;
+            $permohonan->rejected_by_user_id = auth()->id();
         } else {
             // Set tanggal berlaku & berakhir jika disetujui
             $permohonan->tanggal_berlaku = $validated['tanggal_berlaku'];
             $permohonan->tanggal_berakhir = $validated['tanggal_berakhir'];
             $permohonan->status_kedaluwarsa = 'Aktif';
+            
+            // Clear rejection tracking ketika approved
+            $permohonan->rejected_by_role_id = null;
+            $permohonan->rejected_by_user_id = null;
         }
 
         $permohonan->status = $newStatus;
@@ -284,6 +304,36 @@ class ApprovalController extends Controller
     }
 
     /**
+     * Show revision list for specific staff role.
+     */
+    public function revisi(): View
+    {
+        $user = auth()->user();
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+        $userRole = $user->role?->slug;
+
+        // Check if user has proper role for revisions
+        if (!$userRole || !in_array($userRole, ['kepala_seksi', 'kepala_bidang'])) {
+            abort(403, 'Anda tidak memiliki akses ke halaman revisi');
+        }
+
+        // Filter permohonan based on role (Hanya list revisi yang menunggu mereka)
+        $query = PermohonanReklame::query();
+
+        if ($userRole === 'kepala_seksi') {
+            $query->where('status', 'Revisi Menunggu Kepala Seksi');
+        } elseif ($userRole === 'kepala_bidang') {
+            $query->where('status', 'Revisi Menunggu Kepala Bidang');
+        }
+
+        $permohonan = $query->orderBy('updated_at', 'desc')->paginate(10);
+
+        return view('approval.revisi', compact('permohonan', 'userRole'));
+    }
+
+    /**
      * Show approval dashboard.
      */
     public function dashboard(): View
@@ -303,11 +353,14 @@ class ApprovalController extends Controller
         $query = PermohonanReklame::query();
 
         if ($userRole === 'operator') {
-            $query->whereIn('status', ['Diajukan', 'Diverifikasi Operator', 'Ditolak Operator']);
+            $query->whereIn('status', ['Diajukan', 'Revisi Menunggu Operator', 'Diverifikasi Operator', 'Ditolak Operator']);
         } elseif ($userRole === 'kepala_seksi') {
-            $query->whereIn('status', ['Diverifikasi Operator', 'Disetujui Kepala Seksi', 'Ditolak Kepala Seksi']);
+            $query->whereIn('status', ['Revisi Menunggu Kepala Seksi', 'Diverifikasi Operator', 'Disetujui Kepala Seksi', 'Ditolak Kepala Seksi']);
         } elseif ($userRole === 'kepala_bidang') {
-            $query->where('status', 'Disetujui Kepala Seksi');
+            $query->whereIn('status', ['Revisi Menunggu Kepala Bidang', 'Disetujui Kepala Seksi', 'Disetujui Kepala Bidang', 'Ditolak Kepala Bidang']);
+        } elseif ($userRole === 'admin') {
+            // Admin can see everything
+            $query->whereNotNull('status');
         }
 
         $permohonan = $query->orderBy('created_at', 'desc')->paginate(10);

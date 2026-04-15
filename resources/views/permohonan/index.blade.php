@@ -66,7 +66,7 @@
                 </table>
             </div>
 
-            {{ $permohonan->links() }}
+            {{ $permohonan->links('pagination::bootstrap-5') }}
         @else
             <div class="alert alert-info">
                 <i class="bi bi-info-circle"></i> Anda belum membuat permohonan. 

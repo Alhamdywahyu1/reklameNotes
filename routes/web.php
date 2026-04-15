@@ -8,12 +8,15 @@ use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\PrintController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\LoginHistoryController;
 use App\Http\Controllers\SuratPernyataanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ReportController;
 
@@ -44,14 +47,38 @@ Route::middleware('guest')->group(function () {
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+
+    // Google OAuth
+    Route::get('auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
+    Route::get('auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
+});
+
+// Email Verification & OTP Routes
+Route::middleware('auth')->group(function () {
+    Route::get('email/verify', [VerifyEmailController::class, 'notice'])->name('verification.notice');
+    Route::get('email/verify/{id}/{hash}', [VerifyEmailController::class, 'verify'])
+        ->middleware('signed')->name('verification.verify');
+    Route::post('email/verification-notification', [VerifyEmailController::class, 'resend'])
+        ->middleware('throttle:6,1')->name('verification.send');
+
+    // OTP Routes
+    Route::get('otp/verify', [OtpController::class, 'show'])->name('otp.show');
+    Route::post('otp/verify', [OtpController::class, 'verify'])->name('otp.verify');
+    Route::post('otp/resend', [OtpController::class, 'resend'])->middleware('throttle:3,1')->name('otp.resend');
+
+    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Login History (Operator only)
+    Route::middleware('role:operator')->group(function () {
+        Route::get('profile/login-history', [LoginHistoryController::class, 'index'])->name('profile.login-history');
+    });
     
     // Reklame Chart (Kepala Seksi & Kepala Bidang only)
     Route::middleware('role:kepala_seksi,kepala_bidang')->group(function () {
@@ -94,6 +121,7 @@ Route::middleware('auth')->group(function () {
     // Approval Routes (untuk Operator, Kepala Seksi, Kepala Bidang, Admin)
     Route::group([], function () {
         Route::get('approval/dashboard', [ApprovalController::class, 'dashboard'])->name('approval.dashboard');
+        Route::get('approval/revisi', [ApprovalController::class, 'revisi'])->name('approval.revisi');
 
         // Operator verification
         Route::get('approval/{permohonan}/verify', [ApprovalController::class, 'verifyOperator'])->name('approval.verify');
@@ -153,9 +181,6 @@ Route::middleware('auth')->group(function () {
     Route::get('requirements/{requirement}/preview', [DocumentRequirementController::class, 'preview'])->name('document-requirements.preview');
     
     Route::delete('requirements/{requirement}', [DocumentRequirementController::class, 'destroy'])->name('document-requirements.destroy');
-
-    // Verify email
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)->name('verification.verify');
 
     // Admin: User Management & Reports
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {

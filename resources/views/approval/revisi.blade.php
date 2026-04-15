@@ -1,21 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Approval')
+@section('title', 'Daftar Revisi Permohonan')
 
 @section('content')
 <div class="header-page">
     <div class="d-flex justify-content-between align-items-center">
         <div>
-            <h1><i class="bi bi-check2-circle"></i> Dashboard Approval</h1>
-            <p class="text-muted">Kelola permohonan yang memerlukan approval</p>
+            <h1><i class="bi bi-pencil-square"></i> Daftar Revisi Permohonan</h1>
+            <p class="text-muted">Permohonan yang telah direvisi oleh pemohon dan menunggu persetujuan Anda</p>
         </div>
-        @if (auth()->user()->hasRole('operator'))
-            <div>
-                <a href="{{ route('approval.status') }}" class="btn btn-success">
-                    <i class="bi bi-graph-up"></i> Lihat Status Approval
-                </a>
-            </div>
-        @endif
     </div>
 </div>
 
@@ -29,32 +22,10 @@
     </div>
 </div>
 
-<!-- Statistics -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card stats-card">
-            <div class="number" style="color: #0d6efd;">{{ $totalPermohonan }}</div>
-            <div class="label">Total Pending</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card stats-card">
-            <div class="number" style="color: #198754;">{{ $disetujui }}</div>
-            <div class="label">Disetujui</div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card stats-card">
-            <div class="number" style="color: #dc3545;">{{ $ditolak }}</div>
-            <div class="label">Ditolak</div>
-        </div>
-    </div>
-</div>
-
-<!-- Permohonan List -->
+<!-- Revisi List -->
 <div class="card">
     <div class="card-header bg-light">
-        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Daftar Permohonan</h5>
+        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Daftar Revisi Menunggu Approval</h5>
     </div>
     <div class="card-body">
         @if ($permohonan->count() > 0)
@@ -125,7 +96,7 @@
             {{ $permohonan->links() }}
         @else
             <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> Tidak ada permohonan yang memerlukan approval pada tahap ini.
+                <i class="bi bi-info-circle"></i> Tidak ada permohonan hasil revisi yang memerlukan approval Anda.
             </div>
         @endif
     </div>

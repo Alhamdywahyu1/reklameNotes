@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Surat Persetujuan - ' . $permohonan->nomor_registrasi)
+@section('title', 'Surat Izin Reklame - ' . $permohonan->nomor_registrasi)
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-4">
+    <div class="row mb-4 no-print">
         <div class="col-md-8">
-            <h2 class="h3 fw-bold">Surat Persetujuan Pemasangan Reklame</h2>
+            <h2 class="h3 fw-bold">Surat Izin Reklame</h2>
             <p class="text-muted">{{ $permohonan->nomor_registrasi }}</p>
         </div>
         <div class="col-md-4 text-end">
@@ -21,138 +21,230 @@
 
     <div class="card border-0 shadow-sm print-area">
         <div class="card-body p-5">
-            <!-- Header -->
-            <div class="text-center mb-5 pb-4 border-bottom">
-                <h3 class="fw-bold mb-2">PEMERINTAH KABUPATEN BANGKALAN</h3>
-                <h3 class="fw-bold mb-3">DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU</h3>
-                <p class="small text-muted mb-0">Jl. Kartini No.4, Rw. 03, Keraton, Kec. Bangkalan, Kabupaten Bangkalan, Jawa Timur 69119, Indonesia.</p>
-                <p class="small text-muted">Telp. (031) 3095020</p>
+
+            {{-- === WATERMARK === --}}
+            <div class="watermark">
+                @if(file_exists(public_path('logo_bangkalan.png')))
+                    <img src="{{ public_path('logo_bangkalan.png') }}" alt="Watermark">
+                @endif
             </div>
 
-            <!-- Nomor dan Tanggal Surat -->
-            <div class="row mb-5">
-                <div class="col-md-6">
-                    <p><strong>Nomor Surat:</strong> {{ $permohonan->nomor_registrasi }}/DPMPTSP/{{ date('Y') }}</p>
-                    <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($finalApproval->tanggal_approval)->format('d F Y') }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Perihal:</strong> <u>Surat Persetujuan Pemasangan Reklame</u></p>
-                </div>
-            </div>
+            {{-- === KOP SURAT === --}}
+            <table style="width: 100%; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 10px;">
+                <tr>
+                    <td style="width: 100px; vertical-align: middle; text-align: center;">
+                        <img src="{{ public_path('logo_bangkalan.png') }}" alt="Logo" style="width: 80px; height: auto;" onerror="this.style.display='none'">
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <p style="margin: 0; font-size: 13px; font-weight: bold;">PEMERINTAH KABUPATEN BANGKALAN</p>
+                        <p style="margin: 0; font-size: 16px; font-weight: bold;">DINAS PENANAMAN MODAL</p>
+                        <p style="margin: 0; font-size: 16px; font-weight: bold;">DAN PELAYANAN TERPADU SATU PINTU</p>
+                        <p style="margin: 2px 0 0 0; font-size: 10px;">Jl. Kartini No. 4, Kraton, Kec. Bangkalan, Kabupaten Bangkalan, Jawa Timur 69119</p>
+                        <p style="margin: 0; font-size: 10px;">(031) 3095020 Laman https://dpmptsp.bangkalankab.go.id/</p>
+                        <p style="margin: 0; font-size: 10px;">Pos-el: dpmptsp@bangkalankab.go.id</p>
+                    </td>
+                    <td style="width: 100px;"></td>
+                </tr>
+            </table>
 
-            <!-- Kepada -->
-            <div class="mb-4">
-                <p><strong>Kepada Yth.:</strong></p>
-                <p style="margin-left: 2rem;">
-                    <strong>Nama:</strong> {{ $permohonan->nama_pemohon }}<br>
-                    <strong>NIK:</strong> {{ $permohonan->nik }}<br>
-                    <strong>Alamat:</strong> {{ $permohonan->alamat_pemohon }}<br>
-                    <strong>No. Telepon:</strong> {{ $permohonan->nomor_telepon }}
+            {{-- === JUDUL SURAT === --}}
+            <div style="text-align: center; margin: 20px 0 5px 0;">
+                <p style="margin: 0; font-size: 14px; font-weight: bold; text-decoration: underline; letter-spacing: 1px;">
+                    S U R A T &nbsp; I Z I N &nbsp; R E K L A M E
+                </p>
+                <p style="margin: 5px 0 0 0; font-size: 12px;">
+                    Nomor : 500.16.7.4/{{ str_pad($permohonan->id, 4, '0', STR_PAD_LEFT) }}/433.114/{{ \Carbon\Carbon::parse($finalApproval->tanggal_approval ?? now())->format('m') }}/{{ \Carbon\Carbon::parse($finalApproval->tanggal_approval ?? now())->format('Y') }}
                 </p>
             </div>
 
-            <!-- Isi Surat -->
-            <div class="mb-5">
-                <p>Dengan ini kami menyatakan bahwa permohonan pemasangan reklame Anda telah disetujui dengan ketentuan sebagai berikut:</p>
-
-                <div style="margin-left: 2rem; margin-right: 2rem;">
-                    <table class="table table-borderless">
-                        <tr>
-                            <td width="35%"><strong>Jenis Reklame</strong></td>
-                            <td>: {{ $permohonan->jenis_reklame }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Ukuran</strong></td>
-                            <td>: {{ $permohonan->ukuran_reklame }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Jumlah</strong></td>
-                            <td>: {{ $permohonan->jumlah_reklame }} Unit</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Lokasi Pemasangan</strong></td>
-                            <td>: {{ $permohonan->lokasi_pemasangan }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Narasi Reklame</strong></td>
-                            <td>: {{ $permohonan->narasi_reklame }}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Berlaku Mulai</strong></td>
-                            <td>: {{ $permohonan->tanggal_berlaku ? \Carbon\Carbon::parse($permohonan->tanggal_berlaku)->format('d F Y') : '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Berlaku Sampai</strong></td>
-                            <td>: {{ $permohonan->tanggal_berakhir ? \Carbon\Carbon::parse($permohonan->tanggal_berakhir)->format('d F Y') : '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Status Kedaluwarsa</strong></td>
-                            <td>: 
-                                @php $status = $permohonan->getStatusKedaluarsa(); @endphp
-                                <strong>
-                                    @if($status === 'Aktif')
-                                        <span style="color: #198754;">✓ AKTIF</span>
-                                    @elseif($status === 'Kedaluwarsa')
-                                        <span style="color: #dc3545;">✗ KEDALUWARSA</span>
-                                    @else
-                                        <span style="color: #666;">DICABUT</span>
-                                    @endif
-                                </strong>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-
-                <p class="mt-4">Dengan diberikannya persetujuan ini, Anda diwajibkan untuk:</p>
-                <ol style="margin-left: 2rem;">
-                    <li>Melakukan pemasangan reklame sesuai dengan spesifikasi yang telah disetujui</li>
-                    <li>Memelihara reklame agar tetap dalam kondisi baik dan rapi</li>
-                    <li>Mematuhi semua peraturan perundang-undangan yang berlaku</li>
-                    <li>Melapor ke Dinas PMPTSP jika ada perubahan atau pembongkaran reklame</li>
-                    <li>Membayar retribusi reklame sesuai dengan ketentuan yang berlaku</li>
-                </ol>
-
-                <p class="mt-4">Surat persetujuan ini berlaku selama pemasangan reklame sesuai dengan permohonan Anda dan dapat dicabut kembali apabila ditemukan pelanggaran.</p>
+            {{-- === DASAR HUKUM === --}}
+            <div style="margin: 20px 0 15px 0; font-size: 12px; line-height: 1.6;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 70px; vertical-align: top; font-weight: bold;">DASAR</td>
+                        <td style="width: 15px; vertical-align: top;">:</td>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td style="vertical-align: top; padding-right: 5px;">1.</td>
+                                    <td>Peraturan Daerah Kabupaten Bangkalan Nomor : 1 Tahun 2024 tentang Pajak Daerah dan Retribusi Daerah;</td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top; padding-right: 5px;">2.</td>
+                                    <td>Peraturan Bupati Bangkalan Nomor : 56 tahun 2011 tentang Tata Cara Penyelenggaraan Reklame;</td>
+                                </tr>
+                                <tr>
+                                    <td style="vertical-align: top; padding-right: 5px;">3.</td>
+                                    <td>Peraturan Bupati Bangkalan Nomor : 44 Tahun 2021 Tentang Pendelegasian Kewenangan Penyelenggaraan Perizinan Berusaha Kepada Kepala Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu Kabupaten Bangkalan.</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
-            <!-- Tanda Tangan -->
-            <div class="row mt-5">
-                <div class="col-md-8"></div>
-                <div class="col-md-4 text-center">
-                    <p><strong>Kepala Bidang,</strong></p>
-                    <div style="height: 80px;"></div>
-                    <p style="border-top: 1px solid #000; padding-top: 5px;">
-                        <u>{{ $finalApproval->user->name ?? 'Nama Pejabat' }}</u><br>
-                        <small>NIP. -</small>
-                    </p>
-                </div>
+            {{-- === MEMBERIKAN IZIN KEPADA === --}}
+            <div style="text-align: center; margin: 15px 0; font-size: 12px; font-weight: bold;">
+                DENGAN INI MEMBERIKAN IZIN KEPADA :
             </div>
 
-            <!-- Catatan -->
-            <div class="alert alert-info mt-5 no-print">
-                <strong><i class="bi bi-info-circle"></i> Catatan untuk Pemohon:</strong>
-                <ul class="mb-0 mt-2">
-                    <li>Surat ini sudah dalam status APPROVED dan siap dicetak</li>
-                    <li>Harap dibawa ke kantor DPMPTSP untuk verifikasi final dan pengambilan dokumen asli</li>
-                    <li>Jangan lupa membawa identitas diri saat ke kantor</li>
-                    <li>Jam operasional kantor: Senin - Jumat, 08:00 - 16:00 WIB</li>
-                </ul>
+            {{-- === DATA PEMOHON === --}}
+            <div style="font-size: 12px; line-height: 1.8; margin: 0 0 5px 30px;">
+                <table style="width: 95%;">
+                    <tr>
+                        <td style="width: 15px; vertical-align: top;">1.</td>
+                        <td style="width: 280px; vertical-align: top;">Nama Orang / Badan / Organisasi</td>
+                        <td style="width: 15px; vertical-align: top;">:</td>
+                        <td style="vertical-align: top; font-weight: bold;">{{ strtoupper($permohonan->nama_pemohon) }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;">2.</td>
+                        <td style="vertical-align: top;">Tempat Tinggal / Alamat</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->alamat_pemohon }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;">3.</td>
+                        <td style="vertical-align: top;">Pekerjaan</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->pekerjaan ?? '-' }}</td>
+                    </tr>
+                </table>
             </div>
+
+            <div style="font-size: 12px; margin: 10px 0 5px 0;">
+                Untuk menyelenggarakan Reklame :
+            </div>
+
+            {{-- === DATA REKLAME === --}}
+            <div style="font-size: 12px; line-height: 1.8; margin: 0 0 0 30px;">
+                <table style="width: 95%;">
+                    <tr>
+                        <td style="width: 15px; vertical-align: top;">1.</td>
+                        <td style="width: 280px; vertical-align: top;">Jenis / Klasifikasi Reklame</td>
+                        <td style="width: 15px; vertical-align: top;">:</td>
+                        <td style="vertical-align: top; font-weight: bold;">{{ strtoupper($permohonan->nama_reklame ?? 'BILLBOARD') }} / {{ strtoupper($permohonan->jenis_reklame) }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;">2.</td>
+                        <td style="vertical-align: top;">Luas dan Jumlah</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->ukuran_reklame }} / {{ $permohonan->jumlah_reklame }} Buah</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;">3.</td>
+                        <td style="vertical-align: top;">Narasi</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top; font-weight: bold;">{{ strtoupper($permohonan->narasi_reklame) }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;">4.</td>
+                        <td style="vertical-align: top;">Lokasi Pemancangan Reklame</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->lokasi_pemasangan }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;"></td>
+                        <td style="vertical-align: top;">Klasifikasi Lokasi</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->klasifikasi_lokasi ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;"></td>
+                        <td style="vertical-align: top;">Reklame untuk Keperluan</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->keperluan_reklame ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;"></td>
+                        <td style="vertical-align: top;">Reklame memakai berapa warna</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $permohonan->jumlah_warna ? $permohonan->jumlah_warna . ' Warna' : 'Multi Warna' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;">5.</td>
+                        <td colspan="3" style="vertical-align: top;">
+                            Syarat &ndash; syarat :
+                            <div style="margin-left: 15px; margin-top: 3px;">
+                                <table>
+                                    <tr>
+                                        <td style="vertical-align: top; padding-right: 5px;">a.</td>
+                                        <td>Tidak boleh mengganggu pemandangan umum / Lalu lintas (Kendaraan, Pejalan Kaki), norma keagamaan, kesusilaan, keamanan dan kesehatan.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="vertical-align: top; padding-right: 5px;">b.</td>
+                                        <td>Tidak boleh merubah, menambah sebagian reklame.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="vertical-align: top; padding-right: 5px;">c.</td>
+                                        <td>Surat keputusan ini dicabut apabila yang bersangkutan tidak memenuhi ketentuan peraturan Perundang-undangan yang berlaku.</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            {{-- === MASA BERLAKU === --}}
+            <div style="font-size: 12px; line-height: 1.8; margin: 10px 0 0 30px;">
+                <table style="width: 95%;">
+                    <tr>
+                        <td style="width: 15px; vertical-align: top;">6.</td>
+                        <td style="width: 280px; vertical-align: top;">Masa berlakunya izin Reklame</td>
+                        <td style="width: 15px; vertical-align: top;">:</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="padding-left: 20px;">Dari Tanggal</td>
+                        <td>:</td>
+                        <td style="font-weight: bold;">{{ $permohonan->tanggal_berlaku ? \Carbon\Carbon::parse($permohonan->tanggal_berlaku)->translatedFormat('d F Y') : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td style="padding-left: 20px;">Sampai Tanggal</td>
+                        <td>:</td>
+                        <td style="font-weight: bold;">{{ $permohonan->tanggal_berakhir ? \Carbon\Carbon::parse($permohonan->tanggal_berakhir)->translatedFormat('d F Y') : '-' }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            {{-- === TTD & PENGESAHAN === --}}
+            <div style="margin-top: 25px; font-size: 12px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="width: 50%;"></td>
+                        <td style="text-align: center;">
+                            <p style="margin: 0;">Ditetapkan di : Bangkalan</p>
+                            <p style="margin: 0;">Pada Tanggal &nbsp;&nbsp;: {{ \Carbon\Carbon::parse($finalApproval->tanggal_approval ?? now())->translatedFormat('d F Y') }}</p>
+                            <br>
+                            <p style="margin: 0; font-weight: bold; font-size: 11px;">KEPALA DINAS PENANAMAN MODAL</p>
+                            <p style="margin: 0; font-weight: bold; font-size: 11px;">DAN PELAYANAN TERPADU SATU PINTU</p>
+                            <p style="margin: 0; font-weight: bold; font-size: 11px;">KABUPATEN BANGKALAN</p>
+                            <div style="height: 80px;"></div>
+                            <p style="margin: 0; font-weight: bold; text-decoration: underline;">
+                                RIZAL MORRIS, A.P., M.Si.
+                            </p>
+                            <p style="margin: 0; font-size: 11px;">Pembina Utama Muda</p>
+                            <p style="margin: 0; font-size: 11px;">NIP. 19740924 199311 1 002</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
         </div>
     </div>
 
-    <div class="alert alert-success mt-4">
+    <div class="alert alert-success mt-4 no-print">
         <i class="bi bi-check-circle"></i>
-        <strong>Status Permohonan:</strong> DISETUJUI - Silakan cetak surat ini dan bawa ke kantor DPMPTSP untuk proses selanjutnya.
+        <strong>Status Permohonan:</strong> DISETUJUI - Silakan cetak surat ini sebagai Surat Izin Reklame resmi.
     </div>
 </div>
 
 <style media="print">
     .no-print {
-        display: none;
+        display: none !important;
     }
     
     body {
@@ -164,12 +256,17 @@
         border: none !important;
     }
     
-    .navbar, .sidebar, .alert {
-        display: none;
+    .navbar, .sidebar, .alert, .btn {
+        display: none !important;
     }
     
     @page {
-        margin: 0.5cm;
+        size: A4;
+        margin: 1.5cm 2cm;
+    }
+    
+    .card-body {
+        padding: 0 !important;
     }
 </style>
 
@@ -177,26 +274,45 @@
     .print-area {
         max-width: 900px;
         margin: 0 auto;
+        font-family: 'Times New Roman', Times, serif;
+        position: relative;
+    }
+    
+    .watermark {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.08;
+        z-index: -1;
+        width: 400px;
+        height: 400px;
+    }
+    
+    .watermark img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
     }
     
     @media print {
         body {
             margin: 0;
             padding: 0;
+            font-family: 'Times New Roman', Times, serif;
         }
         
         .container-fluid {
             max-width: 100%;
+            padding: 0;
         }
     }
 </style>
 
 <script>
     function printAndTrack() {
-        // Trigger print
         window.print();
         
-        // Send tracking request to backend after a short delay
         setTimeout(() => {
             fetch('{{ route("print.track-surat", $permohonan) }}', {
                 method: 'POST',
@@ -207,9 +323,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Show success message
                 const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-4';
+                alertDiv.className = 'alert alert-success alert-dismissible fade show mt-4 no-print';
                 alertDiv.role = 'alert';
                 alertDiv.innerHTML = `
                     <i class="bi bi-check-circle"></i>
@@ -220,7 +335,6 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat mengirim notifikasi. Silakan hubungi administrator.');
             });
         }, 1000);
     }

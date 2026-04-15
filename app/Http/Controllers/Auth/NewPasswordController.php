@@ -3,18 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Http\Controllers\Controller;
 
 class NewPasswordController extends Controller
 {
-    use ResetsPasswords;
-
-    protected $redirectTo = 'dashboard';
-
     /**
      * Display the password reset view.
      */
@@ -36,15 +34,19 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', 'min:8'],
         ]);
 
-        // Password reset logic handled by trait ResetsPasswords
-        $status = $this->broker()->reset(
-            $this->credentials($request),
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
-                $this->resetPassword($user, $password);
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
             }
         );
 
-        return $status === \Illuminate\Auth\Passwords\PasswordBroker::PASSWORD_RESET
+        return $status === Password::PASSWORD_RESET
                     ? redirect()->route('login')->with('status', __($status))
                     : back()->withInput($request->only('email'))
                             ->withErrors(['email' => __($status)]);

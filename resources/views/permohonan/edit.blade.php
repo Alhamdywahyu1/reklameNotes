@@ -140,6 +140,20 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="keperluan_reklame" class="form-label">Reklame untuk Keperluan</label>
+                    <select class="form-select @error('keperluan_reklame') is-invalid @enderror" 
+                        id="keperluan_reklame" name="keperluan_reklame">
+                        <option value="">-- Pilih --</option>
+                        <option value="Komersial" @selected(old('keperluan_reklame', $permohonan->keperluan_reklame) === 'Komersial')>Komersial</option>
+                        <option value="Non Komersial" @selected(old('keperluan_reklame', $permohonan->keperluan_reklame) === 'Non Komersial')>Non Komersial</option>
+                        <option value="Sosial" @selected(old('keperluan_reklame', $permohonan->keperluan_reklame) === 'Sosial')>Sosial</option>
+                    </select>
+                    @error('keperluan_reklame')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
                     <label for="narasi_reklame" class="form-label">Narasi/Isi Reklame <span class="text-danger">*</span></label>
                     <textarea class="form-control @error('narasi_reklame') is-invalid @enderror" 
                               id="narasi_reklame" name="narasi_reklame" rows="3" required>{{ old('narasi_reklame', $permohonan->narasi_reklame) }}</textarea>

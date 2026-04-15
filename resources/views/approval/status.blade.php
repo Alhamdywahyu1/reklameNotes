@@ -133,6 +133,14 @@
                                         <span class="badge bg-danger">
                                             <i class="bi bi-x-circle"></i> Ditolak Seksi
                                         </span>
+                                    @elseif ($item->status === 'Revisi Menunggu Operator')
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-arrow-repeat"></i> Revisi → Operator
+                                        </span>
+                                    @elseif ($item->status === 'Revisi Menunggu Kepala Seksi')
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-arrow-repeat"></i> Revisi → Kepala Seksi
+                                        </span>
                                     @else
                                         <span class="badge bg-warning">{{ $item->status }}</span>
                                     @endif

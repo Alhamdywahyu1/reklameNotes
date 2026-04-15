@@ -97,15 +97,49 @@
         .sidebar-wrapper {
             display: flex;
             height: calc(100vh - 80px);
+            overflow: hidden;
+            position: relative;
         }
 
         .sidebar {
             background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
             width: 260px;
             overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: 2px 0 15px rgba(2, 132, 199, 0.06);
             padding: 1.5rem 0;
             border-right: 1px solid var(--gray-border);
+            transition: width 0.3s ease;
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed {
+            width: 76px;
+        }
+
+        .sidebar .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar .sidebar-header .sidebar-section-title {
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .sidebar.collapsed .sidebar-section-title {
+            display: none;
         }
 
         .sidebar .nav-link {
@@ -119,12 +153,24 @@
             align-items: center;
             gap: 12px;
             margin: 0 0.5rem;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-link {
+            padding: 0.85rem 0;
+            justify-content: center;
+            margin: 0 0.5rem;
+        }
+
+        .sidebar.collapsed .nav-text {
+            display: none;
         }
 
         .sidebar .nav-link i {
-            width: 20px;
+            width: 22px;
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 1.25rem;
+            margin: 0;
         }
 
         .sidebar .nav-link:hover {
@@ -155,6 +201,7 @@
             overflow-y: auto;
             padding: 2rem;
             background: linear-gradient(120deg, #f6fcff, #ebf7ff);
+            transition: width 0.3s ease;
         }
 
         .main-content {
@@ -410,26 +457,6 @@
             border-color: var(--primary);
         }
 
-        /* Footer */
-        footer {
-            background: linear-gradient(135deg, var(--dark) 0%, #111827 100%);
-            color: white;
-            padding: 2rem 0;
-            margin-top: 4rem;
-            border-top: none;
-        }
-
-        .footer-bottom {
-            font-size: 0.9rem;
-            color: #d1d5db;
-        }
-
-        .footer-brand {
-            font-weight: 700;
-            color: white;
-            font-size: 1.1rem;
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -489,29 +516,95 @@
             background: #94a3b8;
         }
 
-        /* Footer Modern Biru Tua */
+        /* Footer Modern Biru Tua (Gaya Mamikos Dark Theme) */
         footer {
-            background: #0b3b4c;
-            color: rgba(255, 255, 255, 0.9);
-            padding: 2.5rem 0;
-            text-align: center;
-            font-size: 0.98rem;
-            margin-top: 3rem;
-            border-top: 1px solid rgba(2, 132, 199, 0.2);
+            background: #0b3b4c; /* biru deep kehijauan */
+            color: rgba(255,255,255,0.85); /* teks putih transparan */
+            padding: 4rem 0 0rem;
+            border-top: none;
+            font-size: 0.95rem;
+            text-align: left;
+            margin-top: 4rem;
+        }
+        
+        .footer-heading {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff; /* teks putih tegas */
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        footer .footer-brand {
-            font-weight: 700;
+        .footer-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-list li {
+            margin-bottom: 0.85rem;
+        }
+
+        .footer-list a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .footer-list a:hover {
             color: #b9e6f5;
         }
 
-        footer .footer-bottom {
-            color: rgba(255, 255, 255, 0.85);
+        .footer-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
         }
 
-        footer i {
-            color: #9ad4e6;
-            margin-right: 4px;
+        .footer-socials {
+            display: flex;
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .footer-socials a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+            border-radius: 50%;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .footer-socials a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .store-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .store-buttons img {
+            height: 40px;
+            border-radius: 6px;
+            transition: transform 0.2s;
+        }
+
+        .store-buttons img:hover {
+            transform: scale(1.05);
         }
     </style>
     <link rel="stylesheet" href="{{ asset('css/modern-dashboard.css') }}">
@@ -522,6 +615,9 @@
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
+                <button class="btn btn-link text-white border-0 d-md-none me-2" id="mobileSidebarBtn" title="Buka Sidebar">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
                 <a class="navbar-brand" href="{{ route('home') }}">
                     <img src="{{ asset('logo_bangkalan.png') }}" alt="Logo Bangkalan" style="height: 40px; border-radius: 6px;">
                     <span>DPMPTSP</span>
@@ -537,6 +633,9 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                                @if(auth()->user()->hasRole('operator'))
+                                <li><a class="dropdown-item" href="{{ route('profile.login-history') }}"><i class="bi bi-clock-history"></i> Riwayat Login</a></li>
+                                @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="w-100">
@@ -554,38 +653,56 @@
         <!-- Main Layout -->
         <div class="sidebar-wrapper">
             <!-- Sidebar -->
-            <nav class="sidebar">
+            <nav class="sidebar" id="mainSidebar">
+                <script>
+                    // Cegah efek kedip/animasi (FOUC) saat berpindah halaman dengan memberi status tertutup sedini mungkin
+                    if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                        document.getElementById('mainSidebar').classList.add('collapsed');
+                    }
+                </script>
                 <div class="position-sticky pt-3">
-                    <div class="sidebar-section-title">Menu Utama</div>
-                    <ul class="nav flex-column">
+                    <div class="sidebar-header">
+                        <div class="sidebar-section-title">Menu Utama</div>
+                        <button class="btn btn-sm btn-outline-secondary border-0 text-muted" id="toggleSidebarBtn" title="Tutup/Buka Sidebar">
+                            <i class="bi bi-list fs-5"></i>
+                        </button>
+                    </div>
+                    <ul class="nav flex-column mt-0">
                         <li class="nav-item">
                             <a class="nav-link @if(request()->routeIs('dashboard')) active @endif" href="{{ route('dashboard') }}">
-                                <i class="bi bi-speedometer2"></i> Dashboard
+                                <i class="bi bi-speedometer2"></i> <span class="nav-text">Dashboard</span>
                             </a>
                         </li>
 
                         @if (auth()->user()->hasRole('pemohon'))
                             <li class="nav-item">
                                 <a class="nav-link @if(request()->routeIs('permohonan.*')) active @endif" href="{{ route('permohonan.index') }}">
-                                    <i class="bi bi-file-earmark-text"></i> Permohonan Saya
+                                    <i class="bi bi-file-earmark-text"></i> <span class="nav-text">Permohonan Saya</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('permohonan.create') }}">
-                                    <i class="bi bi-plus-circle"></i> Buat Permohonan
+                                    <i class="bi bi-plus-circle"></i> <span class="nav-text">Buat Permohonan</span>
                                 </a>
                             </li>
                         @endif
 
                         @if (auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang']))
                             <li class="nav-item">
-                                <a class="nav-link @if(request()->routeIs('approval.*')) active @endif" href="{{ route('approval.dashboard') }}">
-                                    <i class="bi bi-check2-circle"></i> Approval
+                                <a class="nav-link @if(request()->routeIs('approval.dashboard')) active @endif" href="{{ route('approval.dashboard') }}">
+                                    <i class="bi bi-check2-circle"></i> <span class="nav-text">Approval</span>
                                 </a>
                             </li>
+                            @if (auth()->user()->hasAnyRole(['kepala_seksi', 'kepala_bidang']))
+                                <li class="nav-item">
+                                    <a class="nav-link @if(request()->routeIs('approval.revisi')) active @endif" href="{{ route('approval.revisi') }}">
+                                        <i class="bi bi-pencil-square"></i> <span class="nav-text">Revisi</span>
+                                    </a>
+                                </li>
+                            @endif
                             <li class="nav-item">
                                 <a class="nav-link @if(request()->routeIs('permohonan.peta')) active @endif" href="{{ route('permohonan.peta') }}">
-                                    <i class="bi bi-map"></i> Peta Reklame
+                                    <i class="bi bi-map"></i> <span class="nav-text">Peta Reklame</span>
                                 </a>
                             </li>
                         @endif
@@ -594,12 +711,12 @@
                             <div class="sidebar-section-title mt-4">Administrasi</div>
                             <li class="nav-item">
                                 <a class="nav-link @if(request()->routeIs('admin.users.*')) active @endif" href="{{ route('admin.users.index') }}">
-                                    <i class="bi bi-people"></i> Manajemen User
+                                    <i class="bi bi-people"></i> <span class="nav-text">Manajemen User</span>
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link @if(request()->routeIs('admin.reports.*')) active @endif" href="{{ route('admin.reports.index') }}">
-                                    <i class="bi bi-file-earmark-bars"></i> Laporan
+                                    <i class="bi bi-file-earmark-bars"></i> <span class="nav-text">Laporan</span>
                                 </a>
                             </li>
                         @endif
@@ -634,25 +751,107 @@
         @yield('content')
     @endif
 
-    <!-- Footer -->
+    <!-- FOOTER MODERN (GAYA MAMIKOS TAPI DARK THEME) -->
     <footer>
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <span class="footer-brand"><i class="bi bi-building"></i> DPMPTSP</span>
-                    <span class="mx-2 text-white-50">|</span>
-                    <span class="footer-bottom">Sistem Pendaftaran Reklame</span>
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <!-- Kolom 1: Logo & Info -->
+                <div class="col-lg-4 mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <img src="{{ asset('logo_bangkalan.png') }}" alt="Logo" style="height: 48px;">
+                        <span class="fs-4 fw-bold text-white" style="letter-spacing: -0.5px;">DPMPTSP</span>
+                    </div>
+                    <p class="mb-2" style="font-size: 1rem; color: rgba(255,255,255,0.85);">Dapatkan "Info Pendaftaran Reklame" terbaru hanya di Sistem Kami.</p>
+                    <p class="mb-0 fw-medium text-white">Mau "Daftar Reklame Mudah"?</p>
+                    
+                    <!-- Tombol Download -->
+                    <div class="store-buttons mt-3 row">
+                        <div class="col-auto">
+                            <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_ENs.svg/320px-Google_Play_Store_badge_ENs.svg.png" style="height: 38px; width: auto;" alt="Google Play"></a>
+                        </div>
+                        <div class="col-auto">
+                            <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/320px-Download_on_the_App_Store_Badge.svg.png" style="height: 38px; width: auto;" alt="App Store"></a>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <p class="footer-bottom mb-0">
-                        &copy; {{ date('Y') }} Dinas Penanaman Modal dan Perizinan Terpadu. All Rights Reserved.
-                    </p>
+
+                <!-- Kolom 2: Menu / Informasi -->
+                <div class="col-lg-3 col-md-4 mb-4 ps-lg-4">
+                    <h5 class="footer-heading">INFORMASI</h5>
+                    <ul class="footer-list">
+                        <li><a href="#">Tentang Kami</a></li>
+                        <li><a href="#">Berita & Pengumuman</a></li>
+                        <li><a href="#">Panduan Pendaftaran</a></li>
+                        <li><a href="#">Pusat Bantuan</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 3: Kebijakan -->
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h5 class="footer-heading">KEBIJAKAN</h5>
+                    <ul class="footer-list">
+                        <li><a href="#">Kebijakan Privasi</a></li>
+                        <li><a href="#">Syarat dan Ketentuan<br>Umum</a></li>
+                    </ul>
+                </div>
+
+                <!-- Kolom 4: Hubungi Kami -->
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <h5 class="footer-heading">HUBUNGI KAMI</h5>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-envelope"></i> dpmptsp@bangkalankab.go.id
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-whatsapp"></i> +6281325111171
+                    </div>
+                    <div class="footer-socials">
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom: Sertifikasi & Copyright -->
+            <div class="footer-bottom pb-4 border-top" style="border-color: rgba(255,255,255,0.1) !important; margin-top: 3rem; padding-top: 2rem;">
+                <div class="text-end w-100" style="color: rgba(255,255,255,0.7); font-weight: 500;">
+                    &copy; {{ date('Y') }} DPMPTSP Bangkalan. All rights reserved
                 </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script for Sidebar Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('toggleSidebarBtn');
+            const mobileBtn = document.getElementById('mobileSidebarBtn');
+            const sidebar = document.getElementById('mainSidebar');
+
+            if (sidebar) {
+                const toggleSidebar = function () {
+                    sidebar.classList.toggle('collapsed');
+                    // Simpan status baru ke localStorage
+                    localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+                };
+                
+                const mobileToggleSidebar = function () {
+                    sidebar.classList.toggle('show');
+                };
+
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', toggleSidebar);
+                }
+                
+                if (mobileBtn) {
+                    mobileBtn.addEventListener('click', mobileToggleSidebar);
+                }
+            }
+        });
+    </script>
+    
     @stack('scripts')
 </body>
 </html>

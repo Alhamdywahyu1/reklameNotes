@@ -249,7 +249,10 @@ class DocumentRequirementController extends Controller
             'created_at' => now(),
         ]);
 
-        return redirect()->back()
+        $url = url()->previous();
+        $url = preg_replace('/#.*/', '', $url);
+
+        return redirect()->to($url . '#requirement-' . $requirement->id)
             ->with('success', 'Status persyaratan dokumen berhasil diperbarui');
     }
 

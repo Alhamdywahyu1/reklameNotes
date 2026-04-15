@@ -213,7 +213,7 @@
             <!-- Daftar Dokumen -->
             <div class="row">
                 @foreach($requirements as $requirement)
-                <div class="col-md-6 mb-4">
+                <div class="col-md-6 mb-4" id="requirement-{{ $requirement->id }}">
                     <div class="doc-card">
                         <div class="doc-card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">

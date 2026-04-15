@@ -48,9 +48,8 @@ class PrintController extends Controller
         }
 
         $approvals = $permohonan->approvalWorkflows()->get();
-        $persyaratan = $permohonan->persyaratanDokumen()->get();
 
-        $pdf = Pdf::loadView('print.pdf', compact('permohonan', 'approvals', 'persyaratan'))
+        $pdf = Pdf::loadView('print.pdf', compact('permohonan', 'approvals'))
             ->setPaper('a4')
             ->setOption('margin-top', 10)
             ->setOption('margin-bottom', 10);

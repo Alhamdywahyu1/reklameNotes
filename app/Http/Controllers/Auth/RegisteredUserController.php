@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Mail\OtpVerificationMail;
 use App\Models\Role;
-use Illuminate\Auth\Events\Registered;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use App\Http\Controllers\Controller;
 
 class RegisteredUserController extends Controller
 {
@@ -33,7 +34,6 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'nik' => ['required', 'string', 'regex:/^\d{16}$/', 'unique:'.User::class],
             'phone' => ['required', 'string', 'max:15'],
             'address' => ['required', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -44,7 +44,6 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'nik' => $request->nik,
             'phone' => $request->phone,
             'address' => $request->address,
             'role_id' => $pemohonRole->id,
@@ -52,10 +51,18 @@ class RegisteredUserController extends Controller
             'is_active' => true,
         ]);
 
-        event(new Registered($user));
+        // Generate OTP 6 digit & kirim ke email
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $user->forceFill([
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes(10),
+        ])->save();
+
+        Mail::to($user->email)->send(new OtpVerificationMail($otp, $user->name));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('otp.show');
     }
 }

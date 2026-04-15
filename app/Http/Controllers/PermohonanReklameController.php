@@ -55,6 +55,8 @@ class PermohonanReklameController extends Controller
             'jumlah_reklame' => 'required|integer|min:1',
             'narasi_reklame' => 'required|string',
             'lokasi_pemasangan' => 'required|string',
+            'klasifikasi_lokasi' => 'nullable|string|max:100',
+            'keperluan_reklame' => 'nullable|string|max:100',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
@@ -146,7 +148,7 @@ class PermohonanReklameController extends Controller
                 'jenis_persyaratan' => $doc['jenis'],
                 'keterangan' => $doc['desc'],
                 'is_lengkap' => false,
-                'status' => 'Draft',
+                'status' => 'Belum Lengkap',
             ]);
         }
 
@@ -263,6 +265,8 @@ class PermohonanReklameController extends Controller
             'jumlah_reklame' => 'required|integer|min:1',
             'narasi_reklame' => 'required|string',
             'lokasi_pemasangan' => 'required|string',
+            'klasifikasi_lokasi' => 'nullable|string|max:100',
+            'keperluan_reklame' => 'nullable|string|max:100',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
@@ -344,8 +348,9 @@ class PermohonanReklameController extends Controller
         if ($permohonan->status === 'Draft') {
             $newStatus = 'Diajukan';
         } elseif (str_contains($permohonan->status, 'Ditolak')) {
-            // Jika sebelumnya ditolak dan pemohon revisi, ubah status ke "Revisi Menunggu Verifikasi"
-            $newStatus = 'Revisi Menunggu Verifikasi';
+            // Jika sebelumnya ditolak dan pemohon revisi, tentukan status berdasarkan siapa yang menolak
+            // Gunakan method getNextRevisionStatus() untuk routing revisi ke petugas yang tepat
+            $newStatus = $permohonan->getNextRevisionStatus();
         } else {
             // Status tidak bisa di-submit jika sudah final (disetujui)
             abort(403, 'Permohonan tidak dapat diajukan pada status: ' . $permohonan->status);
