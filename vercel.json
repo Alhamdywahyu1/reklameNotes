@@ -1,0 +1,8 @@
+{
+  "buildCommand": "composer install --no-dev",
+  "framework": "laravel",
+  "outputDirectory": "public",
+  "php": {
+    "version": "8.2"
+  }
+}

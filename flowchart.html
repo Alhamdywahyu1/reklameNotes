@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowchart - Sistem Izin Reklame DPMPTSP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            overflow-x: auto;
+        }
+
+        .flowchart-section {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+
+        .box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-width: 160px;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .box.start-end {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            min-width: 140px;
+            padding: 15px 20px;
+        }
+
+        .box.decision {
+            background: #fff4e5;
+            border-color: #ff9800;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            min-width: 140px;
+        }
+
+        .box.process {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .box.user-action {
+            background: #f3e5f5;
+            border-color: #9c27b0;
+        }
+
+        .box.role {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: bold;
+            min-width: 140px;
+        }
+
+        .box.operator {
+            background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+            color: #333;
+            border: none;
+        }
+
+        .box.supervisor {
+            background: linear-gradient(135deg, #da70d6 0%, #b24de8 100%);
+            color: white;
+            border: none;
+        }
+
+        .box.head {
+            background: linear-gradient(135deg, #ff7f50 0%, #ff6347 100%);
+            color: white;
+            border: none;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .label {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin: 0 5px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 30px;
+            background: #667eea;
+            border-radius: 2px;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .legend-process {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .legend-user {
+            background: #f3e5f5;
+            border-color: #9c27b0;
+        }
+
+        .legend-decision {
+            background: #fff4e5;
+            border-color: #ff9800;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .legend-role {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .flowchart-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .box {
+                width: 100%;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        .role-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+
+        .role-flow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .role-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-card h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .role-card ul {
+            list-style: none;
+        }
+
+        .role-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        .role-card li:last-child {
+            border-bottom: none;
+        }
+
+        .status-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .status-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.approved {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-badge.rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-badge.pending {
+            background: #fff3e0;
+            color: #e65100;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗂️ Flowchart Sistem Izin Reklame DPMPTSP</h1>
+            <p>Alur Pengurusan Permohonan Izin Reklame dari Registrasi hingga Cetak Surat Izin</p>
+        </div>
+
+        <!-- AUTHENTIKASI SECTION -->
+        <div class="flowchart">
+            <div class="flowchart-section">
+                <div class="section-title">1️⃣ Authentikasi & Registrasi</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Punya Akun?</div>
+                <div class="arrow">→</div>
+                <div class="box user-action">Login Form</div>
+                <div class="arrow">→</div>
+                <div class="box start-end">✓ Dashboard</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div style="width: 100%; text-align: center; color: #667eea; font-weight: bold;">ATAU</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box user-action">Google Login</div>
+                <div class="arrow">→</div>
+                <div class="box process">Izinkan Akses</div>
+                <div class="arrow">→</div>
+                <div class="box start-end">✓ Masuk</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div style="width: 100%; text-align: center; color: #667eea; font-weight: bold;">ATAU</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box user-action">Register Baru</div>
+                <div class="arrow">→</div>
+                <div class="box process">Input Data Diri</div>
+                <div class="arrow">→</div>
+                <div class="box process">Verifikasi Email</div>
+                <div class="arrow">→</div>
+                <div class="box start-end">✓ Dashboard</div>
+            </div>
+
+            <!-- PEMOHON SECTION -->
+            <div style="margin-top: 40px;"></div>
+            <div class="flowchart-section">
+                <div class="section-title">2️⃣ Pengajuan Permohonan (PEMOHON)</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box user-action">Buat Permohonan</div>
+                <div class="arrow">→</div>
+                <div class="box process">Input:<br/>Jenis, Lokasi,<br/>Keperluan, Durasi</div>
+                <div class="arrow">→</div>
+                <div class="box process">Upload Dokumen</div>
+                <div class="arrow">→</div>
+                <div class="box start-end">📋 DRAFT</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box start-end">DRAFT</div>
+                <div class="arrow">→</div>
+                <div class="box decision">Edit/Submit?</div>
+                <div class="arrow">← Edit</div>
+                <div class="box process" style="background: #fff3e0; border-color: #ff9800;">Kembali Edit</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Edit/Submit?</div>
+                <div class="arrow">→ Submit</div>
+                <div class="box process">Status:<br/>BELUM LENGKAP</div>
+                <div class="arrow">→</div>
+                <div class="box operator">Tunggu Operator</div>
+            </div>
+
+            <!-- OPERATOR SECTION -->
+            <div style="margin-top: 40px;"></div>
+            <div class="flowchart-section">
+                <div class="section-title">3️⃣ Verifikasi Dokumen (OPERATOR)</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box operator">Operator Review</div>
+                <div class="arrow">→</div>
+                <div class="box decision">Dokumen<br/>Lengkap?</div>
+                <div class="arrow">→ Tidak</div>
+                <div class="box" style="background: #ffebee; border-color: #c62828;">❌ REJECT</div>
+                <div class="arrow">→</div>
+                <div class="box user-action">Pemohon Revisi</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Dokumen Lengkap?</div>
+                <div class="arrow">→ Ya</div>
+                <div class="box" style="background: #e8f5e9; border-color: #388e3c;">✓ LENGKAP</div>
+                <div class="arrow">→</div>
+                <div class="box supervisor">Kirim Kepala Seksi</div>
+            </div>
+
+            <!-- KEPALA SEKSI SECTION -->
+            <div style="margin-top: 40px;"></div>
+            <div class="flowchart-section">
+                <div class="section-title">4️⃣ Approval Kepala Seksi</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box supervisor">Kepala Seksi</div>
+                <div class="arrow">→</div>
+                <div class="box decision">Setuju?</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Setuju?</div>
+                <div class="arrow">← Tidak</div>
+                <div class="box" style="background: #ffebee; border-color: #c62828;">REVISI MENUNGGU KEPALA SEKSI</div>
+                <div class="arrow">→</div>
+                <div class="box user-action">Pemohon Revisi</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Setuju?</div>
+                <div class="arrow">→ Ya</div>
+                <div class="box head">Kepala Bidang</div>
+            </div>
+
+            <!-- KEPALA BIDANG SECTION -->
+            <div style="margin-top: 40px;"></div>
+            <div class="flowchart-section">
+                <div class="section-title">5️⃣ Final Approval (KEPALA BIDANG)</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box head">Kepala Bidang</div>
+                <div class="arrow">→</div>
+                <div class="box decision">Persetujuan<br/>Akhir?</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Persetujuan Akhir?</div>
+                <div class="arrow">← Tolak</div>
+                <div class="box" style="background: #ffebee; border-color: #c62828;">❌ DITOLAK</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Persetujuan Akhir?</div>
+                <div class="arrow">→ Setuju</div>
+                <div class="box" style="background: #e8f5e9; border-color: #388e3c;">✅ DISETUJUI</div>
+                <div class="arrow">→</div>
+                <div class="box process">Generate Surat</div>
+            </div>
+
+            <!-- CETAK SECTION -->
+            <div style="margin-top: 40px;"></div>
+            <div class="flowchart-section">
+                <div class="section-title">6️⃣ Cetak & Download (PEMOHON)</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box user-action">Download Surat</div>
+                <div class="arrow">→</div>
+                <div class="box decision">Format?</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Format?</div>
+                <div class="arrow">PDF</div>
+                <div class="box process">DomPDF</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box decision">Format?</div>
+                <div class="arrow">HTML</div>
+                <div class="box process">Preview</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box process">DomPDF</div>
+                <div class="arrow">→</div>
+                <div class="box start-end">🎉 SELESAI</div>
+            </div>
+
+            <div class="flowchart-section">
+                <div class="box process">Preview</div>
+                <div class="arrow">→</div>
+                <div class="box start-end">🎉 SELESAI</div>
+            </div>
+        </div>
+
+        <!-- LEGEND -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box legend-process">📋</div>
+                <div class="legend-text">Proses Sistem</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-user">👤</div>
+                <div class="legend-text">Aksi User</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-decision">◇</div>
+                <div class="legend-text">Keputusan</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-role">★</div>
+                <div class="legend-text">Role/Actor</div>
+            </div>
+        </div>
+
+        <!-- ROLE DETAILS SECTION -->
+        <div class="role-section">
+            <h2 style="margin-bottom: 20px; color: #333;">👥 Detail Peran & Tanggung Jawab</h2>
+            <div class="role-flow">
+                <div class="role-card">
+                    <h3 style="color: #9c27b0;">👤 PEMOHON</h3>
+                    <ul>
+                        <li>✅ Register / Login</li>
+                        <li>✅ Buat Permohonan</li>
+                        <li>✅ Upload Dokumen</li>
+                        <li>✅ Lihat Status</li>
+                        <li>✅ Revisi Dokumen</li>
+                        <li>✅ Download Surat</li>
+                    </ul>
+                    <div class="status-list">
+                        <span class="status-badge">DRAFT</span>
+                        <span class="status-badge pending">BELUM LENGKAP</span>
+                        <span class="status-badge pending">REVISI</span>
+                    </div>
+                </div>
+
+                <div class="role-card">
+                    <h3 style="color: #ff9800;">🔍 OPERATOR</h3>
+                    <ul>
+                        <li>✅ Review Dokumen</li>
+                        <li>✅ Verifikasi Data</li>
+                        <li>✅ Reject/Approve</li>
+                        <li>✅ Kirim ke Kepala Seksi</li>
+                        <li>✅ Lihat Notifikasi</li>
+                    </ul>
+                    <div class="status-list">
+                        <span class="status-badge">BELUM LENGKAP</span>
+                        <span class="status-badge approved">LENGKAP</span>
+                    </div>
+                </div>
+
+                <div class="role-card">
+                    <h3 style="color: #da70d6;">📊 KEPALA SEKSI</h3>
+                    <ul>
+                        <li>✅ Review Permohonan</li>
+                        <li>✅ Approve/Reject</li>
+                        <li>✅ Kirim ke Kepala Bidang</li>
+                        <li>✅ Lihat Dashboard</li>
+                        <li>✅ Lihat Chart Data</li>
+                    </ul>
+                    <div class="status-list">
+                        <span class="status-badge pending">DITUNDA KEPALA SEKSI</span>
+                        <span class="status-badge approved">DITUNDA KEPALA BIDANG</span>
+                    </div>
+                </div>
+
+                <div class="role-card">
+                    <h3 style="color: #ff7f50;">⭐ KEPALA BIDANG</h3>
+                    <ul>
+                        <li>✅ Final Approval</li>
+                        <li>✅ Approve/Reject</li>
+                        <li>✅ Generate Surat</li>
+                        <li>✅ Monitor Semua</li>
+                        <li>✅ Lihat Analytics</li>
+                    </ul>
+                    <div class="status-list">
+                        <span class="status-badge pending">DITUNDA KEPALA BIDANG</span>
+                        <span class="status-badge approved">DISETUJUI</span>
+                        <span class="status-badge rejected">DITOLAK</span>
+                    </div>
+                </div>
+
+                <div class="role-card">
+                    <h3 style="color: #333;">🔐 ADMIN</h3>
+                    <ul>
+                        <li>✅ User Management</li>
+                        <li>✅ View Reports</li>
+                        <li>✅ Monitor Sistem</li>
+                        <li>✅ Lihat Activity Logs</li>
+                        <li>✅ System Settings</li>
+                    </ul>
+                    <div class="status-list">
+                        <span class="status-badge">ALL STATUS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUS REFERENCE -->
+        <div class="role-section" style="margin-top: 30px;">
+            <h2 style="margin-bottom: 20px; color: #333;">📊 Referensi Status Permohonan</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #e3f2fd;">
+                    <strong style="color: #1976d2;">📋 DRAFT</strong><br/>
+                    Permohonan baru, belum disubmit
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #fff3e0;">
+                    <strong style="color: #e65100;">⏳ BELUM LENGKAP</strong><br/>
+                    Menunggu verifikasi operator
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #ffe0b2;">
+                    <strong style="color: #e65100;">🔄 REVISI</strong><br/>
+                    Dokumen ditolak, perlu revisi
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #e8f5e9;">
+                    <strong style="color: #388e3c;">✅ LENGKAP</strong><br/>
+                    Dokumen lengkap, ke kepala seksi
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #f3e5f5;">
+                    <strong style="color: #7b1fa2;">⏳ DITUNDA KEPALA SEKSI</strong><br/>
+                    Menunggu approval kepala seksi
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #fce4ec;">
+                    <strong style="color: #c2185b;">⏳ DITUNDA KEPALA BIDANG</strong><br/>
+                    Menunggu final approval
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #c8e6c9;">
+                    <strong style="color: #2e7d32;">✅ DISETUJUI</strong><br/>
+                    Permohonan disetujui!
+                </div>
+                <div style="padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #ffcdd2;">
+                    <strong style="color: #c62828;">❌ DITOLAK</strong><br/>
+                    Permohonan ditolak
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
