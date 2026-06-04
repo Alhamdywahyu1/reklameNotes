@@ -15,24 +15,29 @@ class SearchController extends Controller
     public function search(Request $request): View
     {
         $query = $request->query('q', '');
-        $permohonan = [];
-        
-        if (!empty($query)) {
-            $permohonan = PermohonanReklame::where(function ($q) use ($query) {
-                $q->where('nomor_registrasi', 'like', "%{$query}%")
-                  ->orWhere('nik', 'like', "%{$query}%")
-                  ->orWhere('nama_pemohon', 'like', "%{$query}%");
-            })
+        $permohonanQuery = PermohonanReklame::query()
             ->when(!Auth::user()->hasRole('pemohon'), function ($q) {
                 // Staff dapat melihat semua permohonan
                 return $q;
             }, function ($q) {
                 // Pemohon hanya lihat milik sendiri
                 return $q->where('user_id', Auth::id());
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            });
+
+        if (!empty($query)) {
+            $permohonanQuery->where(function ($q) use ($query) {
+                $q->where('nomor_registrasi', 'like', "%{$query}%")
+                  ->orWhere('nik', 'like', "%{$query}%")
+                  ->orWhere('nama_pemohon', 'like', "%{$query}%");
+            });
+        } else {
+            $permohonanQuery->whereRaw('1 = 0');
         }
+
+        $permohonan = $permohonanQuery
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('search.results', compact('permohonan', 'query'));
     }

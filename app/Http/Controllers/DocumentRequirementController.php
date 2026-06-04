@@ -18,18 +18,17 @@ class DocumentRequirementController extends Controller
     }
 
     /**
-     * Show form untuk input persyaratan dokumen (Pemohon).
+     * Redirect to edit permohonan page (upload dokumen now integrated there).
      */
-    public function createForPemohon(PermohonanReklame $permohonan): View
+    public function createForPemohon(PermohonanReklame $permohonan): RedirectResponse
     {
         // Cek otorisasi
         if ($permohonan->user_id !== auth()->id()) {
             abort(403, 'Anda tidak memiliki akses ke permohonan ini');
         }
 
-        $requirements = $permohonan->documentRequirements()->get();
-
-        return view('document-requirements.create-pemohon', compact('permohonan', 'requirements'));
+        return redirect()->route('permohonan.edit', $permohonan)
+            ->with('info', 'Upload dokumen telah dipindahkan ke halaman edit permohonan.');
     }
 
     /**

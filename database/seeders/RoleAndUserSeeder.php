@@ -41,6 +41,11 @@ class RoleAndUserSeeder extends Seeder
                 'slug' => 'admin',
                 'description' => 'Admin sistem',
             ],
+            [
+                'name' => 'Satpol PP',
+                'slug' => 'satpol_pp',
+                'description' => 'Petugas Satpol PP untuk pengawasan reklame di lapangan',
+            ],
         ];
 
         foreach ($roles as $role) {
@@ -92,6 +97,15 @@ class RoleAndUserSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'role_id' => Role::where('slug', 'admin')->first()->id,
                 'phone' => '085234567890',
+                'address' => 'Jl. DPMPTSP No. 1',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Petugas Satpol PP',
+                'email' => 'satpolpp@dpmptsp.local',
+                'password' => Hash::make('password123'),
+                'role_id' => Role::where('slug', 'satpol_pp')->first()->id,
+                'phone' => '086234567890',
                 'address' => 'Jl. DPMPTSP No. 1',
                 'is_active' => true,
             ],

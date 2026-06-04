@@ -211,71 +211,138 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-file-earmark-pdf"></i> Dokumen
-                </h5>
-            </div>
-            <div class="card-body">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-file-earmark-check"></i> Upload Persyaratan Dokumen
+            </h5>
+        </div>
+        <div class="card-body">
+            @if(isset($requirements) && $requirements->isNotEmpty())
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="file_ktp" class="form-label">Scan KTP (PDF, JPG, PNG) - Max 5MB</label>
-                        @if ($permohonan->file_ktp)
-                            <div class="alert alert-info alert-sm mb-2">
-                                <small>File saat ini: <a href="{{ Storage::url($permohonan->file_ktp) }}" target="_blank">{{ basename($permohonan->file_ktp) }}</a></small>
-                            </div>
-                        @endif
-                        <input type="file" class="form-control @error('file_ktp') is-invalid @enderror" 
-                               id="file_ktp" name="file_ktp" accept=".pdf,.jpg,.jpeg,.png">
-                        <small class="text-muted">Biarkan kosong jika tidak ingin mengubah</small>
-                        @error('file_ktp')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+                    @foreach($requirements as $index => $req)
+                        <div class="col-md-6 mb-4">
+                            <div class="card border">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-file-earmark"></i> {{ $req->jenis_persyaratan }}
+                                        @if($req->jenis_persyaratan === 'Surat Kuasa')
+                                            <span class="badge bg-secondary ms-2">Opsional</span>
+                                        @else
+                                            <span class="badge bg-danger ms-2">Wajib</span>
+                                        @endif
+                                    </h6>
+                                    <p class="small text-muted mb-3">{{ $req->keterangan }}</p>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="file_npwp" class="form-label">Scan NPWP (PDF, JPG, PNG) - Max 5MB</label>
-                        @if ($permohonan->file_npwp)
-                            <div class="alert alert-info alert-sm mb-2">
-                                <small>File saat ini: <a href="{{ Storage::url($permohonan->file_npwp) }}" target="_blank">{{ basename($permohonan->file_npwp) }}</a></small>
-                            </div>
-                        @endif
-                        <input type="file" class="form-control @error('file_npwp') is-invalid @enderror" 
-                               id="file_npwp" name="file_npwp" accept=".pdf,.jpg,.jpeg,.png">
-                        <small class="text-muted">Biarkan kosong jika tidak ingin mengubah</small>
-                        @error('file_npwp')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
+                                    @php
+                                        if ($permohonan->status === 'Draft') {
+                                            $displayStatus = 'Draft';
+                                            $statusClass = 'badge bg-secondary';
+                                        } elseif ($req->status === 'Lengkap') {
+                                            $displayStatus = 'Lengkap';
+                                            $statusClass = 'badge bg-success';
+                                        } elseif ($req->status === 'Ditolak') {
+                                            $displayStatus = 'Ditolak';
+                                            $statusClass = 'badge bg-danger';
+                                        } elseif ($req->file_dokumen) {
+                                            $displayStatus = 'Dalam Peninjauan';
+                                            $statusClass = 'badge bg-info';
+                                        } else {
+                                            $displayStatus = 'Belum Lengkap';
+                                            $statusClass = 'badge bg-warning text-dark';
+                                        }
+                                    @endphp
 
-                <div class="mb-3">
-                    <label for="file_desain" class="form-label">Desain Reklame (PDF, JPG, PNG) - Max 5MB</label>
-                    @if ($permohonan->file_desain)
-                        <div class="alert alert-info alert-sm mb-2">
-                            <small>File saat ini: <a href="{{ Storage::url($permohonan->file_desain) }}" target="_blank">{{ basename($permohonan->file_desain) }}</a></small>
+                                    <div class="mb-3">
+                                        <small class="text-muted">Status:</small>
+                                        <span class="{{ $statusClass }}">{{ $displayStatus }}</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block">Status unggahan:</small>
+                                        @if($req->file_dokumen)
+                                            <div class="d-flex flex-column flex-sm-row align-items-center gap-2">
+                                                <span class="badge bg-success align-self-center">Sudah diupload</span>
+                                                    <button type="submit" form="delete-requirement-{{ $req->id }}" class="btn btn-outline-danger d-inline-flex align-items-center justify-content-center align-self-center" title="Hapus dokumen" style="width: 2.5rem; height: 2.5rem;">
+                                                        <i class="bi bi-trash fs-5"></i>
+                                                    </button>
+                                            </div>
+
+                                            @php
+                                                $fileExtension = strtolower(pathinfo($req->file_dokumen, PATHINFO_EXTENSION));
+                                                $isImage = in_array($fileExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                $isPdf = $fileExtension === 'pdf';
+                                            @endphp
+
+                                            <div class="mt-3">
+                                                <small class="text-muted d-block mb-2">Dokumen terupload:</small>
+                                                @if($isImage)
+                                                    <a href="{{ route('document-requirements.preview', $req) }}" target="_blank" rel="noopener" class="d-inline-block border rounded overflow-hidden bg-light" title="Buka preview dokumen">
+                                                        <img src="{{ route('document-requirements.preview', $req) }}" alt="Dokumen terupload" class="d-block" style="max-width:min(240px,100%); max-height:180px; width:auto; height:auto; object-fit:contain;" loading="lazy">
+                                                    </a>
+                                                @elseif($isPdf)
+                                                    <div class="border rounded overflow-hidden bg-white" style="height:180px; max-width:min(320px,100%);">
+                                                        <embed src="{{ route('document-requirements.preview', $req) }}" type="application/pdf" width="100%" height="100%" />
+                                                    </div>
+                                                @else
+                                                    <a href="{{ route('document-requirements.preview', $req) }}" class="btn btn-sm btn-outline-info" target="_blank" rel="noopener">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="badge bg-warning text-dark">Belum diupload</span>
+                                        @endif
+                                    </div>
+
+                                    @if($req->status === 'Ditolak' && $req->catatan_penolakan)
+                                        <div class="alert alert-danger py-2 px-3 mb-3" style="font-size: 0.85rem;">
+                                            <strong>Catatan penolakan:</strong> {{ $req->catatan_penolakan }}
+                                        </div>
+                                    @endif
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Upload File</label>
+                                        <input type="file" class="form-control @error("documents.$index.file") is-invalid @enderror"
+                                            name="documents[{{ $index }}][file]"
+                                            accept=".pdf,.jpg,.jpeg,.png">
+                                        <small class="text-muted d-block mt-2">Format: PDF, JPG, PNG | Max 5MB</small>
+                                        @error("documents.$index.file")
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <input type="hidden" name="documents[{{ $index }}][id]" value="{{ $req->id }}">
+                                </div>
+                            </div>
                         </div>
-                    @endif
-                    <input type="file" class="form-control @error('file_desain') is-invalid @enderror" 
-                           id="file_desain" name="file_desain" accept=".pdf,.jpg,.jpeg,.png">
-                    <small class="text-muted">Biarkan kosong jika tidak ingin mengubah</small>
-                    @error('file_desain')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    @endforeach
                 </div>
-            </div>
-        </div>
 
-        <div class="d-flex gap-2 mb-4">
-            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600; padding: 0.75rem 2rem;">
-                <i class="bi bi-check-circle"></i> Simpan Perubahan
-            </button>
-            <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary" style="background: #cbd5e1; color: #0f172a; border: none; font-weight: 600; padding: 0.75rem 2rem;">
-                <i class="bi bi-x-circle"></i> Batal
-            </a>
+                <div class="mt-4 d-flex flex-column flex-sm-row gap-2 justify-content-start">
+                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; font-weight: 600; padding: 0.75rem 2rem;">
+                        <i class="bi bi-check-circle"></i> Simpan Perubahan
+                    </button>
+                    <a href="{{ route('permohonan.show', $permohonan) }}" class="btn btn-secondary" style="background: #cbd5e1; color: #0f172a; border: none; font-weight: 600; padding: 0.75rem 2rem;">
+                        <i class="bi bi-x-circle"></i> Batal
+                    </a>
+                </div>
+            @else
+                <p class="text-muted mb-0">Tidak ada persyaratan dokumen.</p>
+            @endif
         </div>
+    </div>
+
     </form>
+
+    @foreach($requirements as $req)
+        @if($req->file_dokumen)
+            <form id="delete-requirement-{{ $req->id }}" action="{{ route('document-requirements.destroy', $req) }}" method="POST" class="d-none">
+                @csrf
+                @method('DELETE')
+            </form>
+        @endif
+    @endforeach
 
     <div class="card border-warning bg-light mb-4">
         <div class="card-body">

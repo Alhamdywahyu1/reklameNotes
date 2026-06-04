@@ -44,6 +44,11 @@ class PermohonanReklameController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Cek apakah user sudah memverifikasi email (hanya bila OTP verification diaktifkan)
+        if (env('OTP_VERIFICATION_ENABLED', true) && !auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('otp.show')->with('warning', 'Silakan verifikasi email Anda terlebih dahulu sebelum mengajukan permohonan.');
+        }
+
         $validated = $request->validate([
             'nama_pemohon' => 'required|string|max:255',
             'alamat_pemohon' => 'required|string',
@@ -237,7 +242,9 @@ class PermohonanReklameController extends Controller
             abort(403, $permohonan->getEditRestrictionReason() ?? 'Permohonan tidak dapat diedit pada status ini');
         }
 
-        return view('permohonan.edit', compact('permohonan'));
+        $requirements = $permohonan->documentRequirements()->get();
+
+        return view('permohonan.edit', compact('permohonan', 'requirements'));
     }
 
     /**
@@ -259,7 +266,7 @@ class PermohonanReklameController extends Controller
             'nama_pemohon' => 'required|string|max:255',
             'alamat_pemohon' => 'required|string',
             'nomor_telepon' => 'required|string|max:15',
-            'nik' => 'required|string|regex:/^\d{16}$/|unique:permohonan_reklame,nik,' . $permohonan->id,
+            'nik' => 'required|string|regex:/^\d{16}$/',
             'npwp' => 'nullable|string|max:15',
             'jenis_reklame' => 'required|in:Permanen,Non Permanen',
             'ukuran_reklame' => 'required|string|max:255',
@@ -273,6 +280,12 @@ class PermohonanReklameController extends Controller
             'file_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'file_npwp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'file_desain' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'remove_file_ktp' => 'nullable|boolean',
+            'remove_file_npwp' => 'nullable|boolean',
+            'remove_file_desain' => 'nullable|boolean',
+            'documents' => 'nullable|array',
+            'documents.*.id' => 'required|exists:persyaratan_dokumen,id',
+            'documents.*.file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
         $oldValues = $permohonan->getAttributes();
@@ -294,27 +307,93 @@ class PermohonanReklameController extends Controller
                 ->withErrors($fileErrors);
         }
 
+        $documentFileErrors = [];
+        $documentsInput = $request->input('documents', []);
+        $documentFiles = $request->file('documents', []);
+
+        foreach ($documentsInput as $index => $documentInput) {
+            $file = $documentFiles[$index]['file'] ?? null;
+
+            if ($file && $file->isValid()) {
+                $errors = FileValidationService::validateFile($file);
+                if (!empty($errors)) {
+                    $requirementName = $permohonan->documentRequirements()->find($documentInput['id'] ?? 0)?->jenis_persyaratan ?? 'Dokumen';
+                    $documentFileErrors["documents.$index.file"] = "{$requirementName}: " . implode(', ', $errors);
+                }
+            }
+        }
+
+        if (!empty($documentFileErrors)) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($documentFileErrors);
+        }
+
+        foreach (['file_ktp', 'file_npwp', 'file_desain'] as $fileField) {
+            $removeField = 'remove_' . $fileField;
+
+            if ($request->boolean($removeField) && $permohonan->$fileField) {
+                if (Storage::disk('public')->exists($permohonan->$fileField)) {
+                    Storage::disk('public')->delete($permohonan->$fileField);
+                }
+
+                $validated[$fileField] = null;
+            }
+        }
+
         // Handle file uploads dengan secure filename
         if ($request->hasFile('file_ktp')) {
             $file = $request->file('file_ktp');
+            if ($permohonan->file_ktp && Storage::disk('public')->exists($permohonan->file_ktp)) {
+                Storage::disk('public')->delete($permohonan->file_ktp);
+            }
             $filename = FileValidationService::generateSecureFilename($file);
             $path = $file->storeAs('dokumen/ktp', $filename, 'public');
             $validated['file_ktp'] = $path;
         }
         if ($request->hasFile('file_npwp')) {
             $file = $request->file('file_npwp');
+            if ($permohonan->file_npwp && Storage::disk('public')->exists($permohonan->file_npwp)) {
+                Storage::disk('public')->delete($permohonan->file_npwp);
+            }
             $filename = FileValidationService::generateSecureFilename($file);
             $path = $file->storeAs('dokumen/npwp', $filename, 'public');
             $validated['file_npwp'] = $path;
         }
         if ($request->hasFile('file_desain')) {
             $file = $request->file('file_desain');
+            if ($permohonan->file_desain && Storage::disk('public')->exists($permohonan->file_desain)) {
+                Storage::disk('public')->delete($permohonan->file_desain);
+            }
             $filename = FileValidationService::generateSecureFilename($file);
             $path = $file->storeAs('dokumen/desain', $filename, 'public');
             $validated['file_desain'] = $path;
         }
 
+        unset($validated['documents']);
         $permohonan->update($validated);
+
+        foreach ($documentsInput as $index => $documentInput) {
+            $requirement = $permohonan->documentRequirements()->find($documentInput['id'] ?? null);
+            $file = $documentFiles[$index]['file'] ?? null;
+
+            if (!$requirement || !$file || !$file->isValid()) {
+                continue;
+            }
+
+            if ($requirement->file_dokumen && Storage::disk('private')->exists($requirement->file_dokumen)) {
+                Storage::disk('private')->delete($requirement->file_dokumen);
+            }
+
+            $filePath = $file->store('documents/' . $permohonan->id, 'private');
+
+            if ($filePath) {
+                $requirement->update([
+                    'file_dokumen' => $filePath,
+                    'status' => 'Belum Lengkap',
+                ]);
+            }
+        }
 
         // Log activity
         ActivityLog::create([
@@ -410,6 +489,41 @@ class PermohonanReklameController extends Controller
             ->with('success', 'Permohonan berhasil dihapus');
     }
 
+    /**
+     * Delete expired permohonan from map manually by operator.
+     */
+    public function destroyExpiredByOperator(Request $request, PermohonanReklame $permohonan): RedirectResponse
+    {
+        if (!auth()->user()->hasRole('operator')) {
+            abort(403, 'Hanya operator yang dapat menghapus data reklame kedaluwarsa dari peta');
+        }
+
+        if (!$permohonan->canBeDeletedByOperator()) {
+            abort(403, 'Hanya reklame yang sudah disetujui Kepala Bidang dan masa berlakunya habis yang dapat dihapus manual');
+        }
+
+        $permohonan->delete();
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'DELETE_EXPIRED_REKLAME',
+            'model_type' => 'PermohonanReklame',
+            'model_id' => $permohonan->id,
+            'description' => "Operator menghapus reklame kedaluwarsa dari peta: {$permohonan->nomor_registrasi}",
+            'old_values' => [
+                'status' => $permohonan->status,
+                'tanggal_berakhir' => optional($permohonan->tanggal_berakhir)->format('Y-m-d'),
+                'status_kedaluwarsa' => $permohonan->getStatusKedaluarsa(),
+            ],
+            'new_values' => ['deleted_at' => now()->toDateTimeString()],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return redirect()->route('permohonan.peta')->with('success', 'Data reklame kedaluwarsa berhasil dihapus manual oleh operator');
+    }
+
 
     /**
      * Download dokumen file.
@@ -454,9 +568,19 @@ class PermohonanReklameController extends Controller
             abort(403, 'Anda tidak memiliki akses ke halaman peta reklame');
         }
 
-        $permohonan = PermohonanReklame::whereNotNull('latitude')
+        $permohonan = PermohonanReklame::whereIn('status', ['Disetujui Kepala Bidang', 'Sudah Terbit'])
+            ->where(function ($query) {
+                $query->whereNull('status_kedaluwarsa')
+                    ->orWhere('status_kedaluwarsa', '!=', 'Dicabut');
+            })
+            ->whereNotNull('latitude')
             ->whereNotNull('longitude')
-            ->with('user')
+            ->with([
+                'user',
+                'persyaratanDokumen' => function ($q) {
+                    $q->where('jenis_persyaratan', PersyaratanDokumen::JENIS_FOTO_KONDISI_REKLAME);
+                },
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
 

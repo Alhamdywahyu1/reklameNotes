@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\LoginHistoryController;
 use App\Http\Controllers\SuratPernyataanController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\SatpolPpController;
 
 // Public routes
 Route::get('/', function () {
@@ -73,12 +75,17 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
 
     // Dashboard
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('verify_email');
 
     // Login History (Operator only)
     Route::middleware('role:operator')->group(function () {
         Route::get('profile/login-history', [LoginHistoryController::class, 'index'])->name('profile.login-history');
     });
+
+    // Profile (semua user yang sudah login)
+    Route::get('profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     
     // Reklame Chart (Kepala Seksi & Kepala Bidang only)
     Route::middleware('role:kepala_seksi,kepala_bidang')->group(function () {
@@ -86,7 +93,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // Permohonan Reklame Routes (untuk Pemohon only)
-    Route::middleware('role:pemohon')->group(function () {
+    Route::middleware(['role:pemohon', 'verify_email'])->group(function () {
         Route::get('permohonan', [PermohonanReklameController::class, 'index'])->name('permohonan.index');
         Route::get('permohonan/create', [PermohonanReklameController::class, 'create'])->name('permohonan.create');
         Route::post('permohonan', [PermohonanReklameController::class, 'store'])->name('permohonan.store');
@@ -119,7 +126,7 @@ Route::middleware('auth')->group(function () {
     Route::get('permohonan/peta/digital', [PermohonanReklameController::class, 'peta'])->name('permohonan.peta');
 
     // Approval Routes (untuk Operator, Kepala Seksi, Kepala Bidang, Admin)
-    Route::group([], function () {
+    Route::group(['middleware' => 'verify_email'], function () {
         Route::get('approval/dashboard', [ApprovalController::class, 'dashboard'])->name('approval.dashboard');
         Route::get('approval/revisi', [ApprovalController::class, 'revisi'])->name('approval.revisi');
 
@@ -138,12 +145,14 @@ Route::middleware('auth')->group(function () {
     });
 
     // Approval Status (operator only)
-    Route::middleware('role:operator')->group(function () {
+    Route::middleware(['role:operator', 'verify_email'])->group(function () {
         Route::get('approval-status', [ApprovalController::class, 'approvalStatus'])->name('approval.status');
+        Route::delete('permohonan/{permohonan}/expired', [PermohonanReklameController::class, 'destroyExpiredByOperator'])->name('permohonan.destroy-expired');
     });
 
     // Print routes (untuk Operator)
-    Route::middleware('role:operator,admin')->group(function () {
+    Route::middleware(['role:operator,admin', 'verify_email'])->group(function () {
+        Route::get('print/ready', [PrintController::class, 'readyList'])->name('print.ready');
         Route::get('print/{permohonan}/preview', [PrintController::class, 'preview'])->name('print.preview');
         Route::get('print/{permohonan}/pdf', [PrintController::class, 'generatePdf'])->name('print.pdf');
     });
@@ -155,24 +164,30 @@ Route::middleware('auth')->group(function () {
     });
 
     // Notification routes
-    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
-    Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
-    Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
-    Route::get('api/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread-count');
-    Route::get('api/notifications/latest-unread', [NotificationController::class, 'getLatestUnread'])->name('api.notifications.latest-unread');
+    Route::middleware('verify_email')->group(function () {
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+        Route::post('notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+        Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+        Route::get('api/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('api.notifications.unread-count');
+        Route::get('api/notifications/latest-unread', [NotificationController::class, 'getLatestUnread'])->name('api.notifications.latest-unread');
+    });
 
     // Search routes
-    Route::get('search', [SearchController::class, 'search'])->name('search');
-    Route::get('api/search/quick', [SearchController::class, 'quickSearch'])->name('api.search.quick');
+    Route::get('search', [SearchController::class, 'search'])->name('search')->middleware('verify_email');
+    Route::get('api/search/quick', [SearchController::class, 'quickSearch'])->name('api.search.quick')->middleware('verify_email');
 
     // Document Requirements routes
-    Route::middleware('role:pemohon')->group(function () {
+    Route::middleware(['role:pemohon', 'verify_email'])->group(function () {
         Route::get('permohonan/{permohonan}/requirements/create', [DocumentRequirementController::class, 'createForPemohon'])->name('document-requirements.create');
         Route::post('permohonan/{permohonan}/requirements/store-multiple', [DocumentRequirementController::class, 'storeMultiple'])->name('document-requirements.store-multiple');
     });
 
-    Route::middleware('role:operator,kepala_seksi,kepala_bidang,admin')->group(function () {
+    Route::middleware(['role:operator,kepala_seksi,kepala_bidang,admin', 'verify_email'])->group(function () {
+        Route::get('permohonan/{permohonan}/requirements/check-staff', [DocumentRequirementController::class, 'viewForStaff'])->name('document-requirements.check-staff');
+    });
+
+    Route::middleware(['role:operator,kepala_seksi,kepala_bidang,admin', 'verify_email'])->group(function () {
         Route::patch('requirements/{requirement}/status', [DocumentRequirementController::class, 'updateStatus'])->name('document-requirements.update-status');
     });
 
@@ -182,9 +197,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('requirements/{requirement}', [DocumentRequirementController::class, 'destroy'])->name('document-requirements.destroy');
 
     // Admin: User Management & Reports
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:admin', 'verify_email'])->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserManagementController::class);
         Route::post('users/{user}/restore', [UserManagementController::class, 'restore'])->name('users.restore');
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export-pemohon', [ReportController::class, 'exportPemohon'])->name('reports.export-pemohon');
+    });
+
+    // Satpol PP Routes
+    Route::middleware(['role:satpol_pp', 'verify_email'])->group(function () {
+        Route::get('/satpol-pp/map', [SatpolPpController::class, 'map'])->name('satpol-pp.map');
     });
 });

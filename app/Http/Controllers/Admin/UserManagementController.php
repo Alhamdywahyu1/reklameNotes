@@ -9,23 +9,42 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Controllers\Controller;
+
 class UserManagementController extends \App\Http\Controllers\Controller
 {
     /**
+     * Role petugas yang boleh dikelola oleh admin.
+     * Pemohon dan admin tidak termasuk.
+     */
+    private const ALLOWED_ROLES = ['operator', 'kepala_seksi', 'kepala_bidang', 'satpol_pp'];
+
+    /**
      * Display a listing of users.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        // Check authorization
         if (!auth()->user()->hasRole('admin')) {
             abort(403, 'Hanya admin yang dapat mengakses halaman ini');
         }
 
-        $users = User::with('role')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $search = $request->query('search', '');
 
-        return view('admin.users.index', compact('users'));
+        // Hanya tampilkan akun petugas (bukan pemohon / admin)
+        $query = User::with('role')
+            ->whereHas('role', fn($q) => $q->whereIn('slug', self::ALLOWED_ROLES));
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        $users = $query->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($request->query());
+
+        return view('admin.users.index', compact('users', 'search'));
     }
 
     /**
@@ -37,7 +56,8 @@ class UserManagementController extends \App\Http\Controllers\Controller
             abort(403);
         }
 
-        $roles = Role::all();
+        // Hanya role petugas yang bisa dipilih
+        $roles = Role::whereIn('slug', self::ALLOWED_ROLES)->get();
         return view('admin.users.create', compact('roles'));
     }
 
@@ -50,21 +70,24 @@ class UserManagementController extends \App\Http\Controllers\Controller
             abort(403);
         }
 
+        $allowedRoleIds = Role::whereIn('slug', self::ALLOWED_ROLES)->pluck('id')->toArray();
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
-            'role_id' => 'required|exists:roles,id',
+            'role_id'  => ['required', 'exists:roles,id', 'in:' . implode(',', $allowedRoleIds)],
             'is_active' => 'boolean',
         ], [
-            'name.required' => 'Nama wajib diisi',
-            'email.required' => 'Email wajib diisi',
-            'email.email' => 'Format email tidak valid',
-            'email.unique' => 'Email sudah terdaftar',
+            'name.required'     => 'Nama wajib diisi',
+            'email.required'    => 'Email wajib diisi',
+            'email.email'       => 'Format email tidak valid',
+            'email.unique'      => 'Email sudah terdaftar',
             'password.required' => 'Password wajib diisi',
-            'password.min' => 'Password minimal 8 karakter',
-            'password.confirmed' => 'Konfirmasi password tidak sesuai',
-            'role_id.required' => 'Role wajib dipilih',
+            'password.min'      => 'Password minimal 8 karakter',
+            'password.confirmed'=> 'Konfirmasi password tidak sesuai',
+            'role_id.required'  => 'Role wajib dipilih',
+            'role_id.in'        => 'Role yang dipilih tidak diizinkan',
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
@@ -72,15 +95,14 @@ class UserManagementController extends \App\Http\Controllers\Controller
 
         $user = User::create($validated);
 
-        // Log activity
         ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'CREATE_USER',
-            'model_type' => 'User',
-            'model_id' => $user->id,
+            'user_id'     => auth()->id(),
+            'action'      => 'CREATE_USER',
+            'model_type'  => 'User',
+            'model_id'    => $user->id,
             'description' => "Membuat user baru: {$user->name} ({$user->email})",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
         ]);
 
         return redirect()->route('admin.users.index')
@@ -96,12 +118,13 @@ class UserManagementController extends \App\Http\Controllers\Controller
             abort(403);
         }
 
-        // Prevent editing super admin
-        if ($user->id === 1 && auth()->id() !== 1) {
-            abort(403, 'Anda tidak dapat mengedit super admin');
+        // Hanya boleh edit akun petugas
+        if (!in_array($user->role?->slug, self::ALLOWED_ROLES)) {
+            abort(403, 'Anda tidak dapat mengedit akun ini');
         }
 
-        $roles = Role::all();
+        // Hanya role petugas yang bisa dipilih
+        $roles = Role::whereIn('slug', self::ALLOWED_ROLES)->get();
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
@@ -114,41 +137,40 @@ class UserManagementController extends \App\Http\Controllers\Controller
             abort(403);
         }
 
-        if ($user->id === 1 && auth()->id() !== 1) {
-            abort(403);
+        // Hanya boleh update akun petugas
+        if (!in_array($user->role?->slug, self::ALLOWED_ROLES)) {
+            abort(403, 'Anda tidak dapat mengubah akun ini');
         }
 
+        $allowedRoleIds = Role::whereIn('slug', self::ALLOWED_ROLES)->pluck('id')->toArray();
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role_id' => 'required|exists:roles,id',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $user->id,
+            'role_id'   => ['required', 'exists:roles,id', 'in:' . implode(',', $allowedRoleIds)],
             'is_active' => 'boolean',
         ]);
 
         $oldValues = $user->getAttributes();
         $validated['is_active'] = $request->boolean('is_active');
 
-        // Update password if provided
         if ($request->filled('password')) {
-            $request->validate([
-                'password' => 'min:8|confirmed',
-            ]);
+            $request->validate(['password' => 'min:8|confirmed']);
             $validated['password'] = bcrypt($request->password);
         }
 
         $user->update($validated);
 
-        // Log activity
         ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'UPDATE_USER',
-            'model_type' => 'User',
-            'model_id' => $user->id,
+            'user_id'     => auth()->id(),
+            'action'      => 'UPDATE_USER',
+            'model_type'  => 'User',
+            'model_id'    => $user->id,
             'description' => "Mengupdate user: {$user->name}",
-            'old_values' => $oldValues,
-            'new_values' => $user->getAttributes(),
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'old_values'  => $oldValues,
+            'new_values'  => $user->getAttributes(),
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
         ]);
 
         return redirect()->route('admin.users.index')
@@ -164,26 +186,28 @@ class UserManagementController extends \App\Http\Controllers\Controller
             abort(403);
         }
 
-        // Prevent deleting super admin dan current user
-        if ($user->id === 1 || $user->id === auth()->id()) {
-            abort(403, 'Tidak dapat menghapus user ini');
+        // Hanya boleh hapus akun petugas
+        if (!in_array($user->role?->slug, self::ALLOWED_ROLES)) {
+            abort(403, 'Tidak dapat menghapus akun ini');
         }
 
-        $userName = $user->name;
+        if ($user->id === auth()->id()) {
+            abort(403, 'Tidak dapat menghapus akun Anda sendiri');
+        }
+
+        $userName  = $user->name;
         $userEmail = $user->email;
 
-        // Soft delete
         $user->delete();
 
-        // Log activity
         ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'DELETE_USER',
-            'model_type' => 'User',
-            'model_id' => $user->id,
+            'user_id'     => auth()->id(),
+            'action'      => 'DELETE_USER',
+            'model_type'  => 'User',
+            'model_id'    => $user->id,
             'description' => "Menghapus user: {$userName} ({$userEmail})",
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
         ]);
 
         return redirect()->route('admin.users.index')

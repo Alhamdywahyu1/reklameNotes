@@ -10,7 +10,7 @@
             <p class="text-muted">Kelola approval tahap kedua permohonan reklame</p>
         </div>
         <div>
-            <a href="{{ route('dashboard.reklame-chart') }}" class="btn btn-primary">
+            <a href="{{ route('dashboard.reklame-chart', [], false) }}" class="btn btn-primary">
                 <i class="bi bi-bar-chart"></i> Lihat Analytics
             </a>
         </div>
@@ -97,8 +97,8 @@
                                     <span class="badge bg-warning text-dark">{{ $item->status }}</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('approval.verify', $item) }}" class="btn btn-success btn-sm" title="Verifikasi Dokumen">
-                                        <i class="bi bi-file-earmark-check"></i> Verifikasi
+                                    <a href="{{ route('approval.approve-seksi', $item) }}" class="btn btn-success btn-sm" title="Approval Tahap Kepala Seksi">
+                                        <i class="bi bi-check2-circle"></i> Approval Seksi
                                     </a>
                                 </td>
                             </tr>

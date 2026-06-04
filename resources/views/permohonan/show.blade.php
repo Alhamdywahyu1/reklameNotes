@@ -61,21 +61,21 @@
         </div>
         @if (auth()->user()->hasRole('pemohon') && $permohonan->user_id === auth()->id())
             @if ($permohonan->canBeEditedByUser())
-                <div>
-                    <a href="{{ route('permohonan.edit', $permohonan) }}" class="btn btn-warning">
+                <div class="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-center">
+                    <a href="{{ route('permohonan.edit', $permohonan) }}" class="btn btn-warning w-100 w-sm-auto">
                         <i class="bi bi-pencil"></i> Edit
                     </a>
                     @if ($permohonan->status === 'Draft')
-                        <form action="{{ route('permohonan.submit', $permohonan) }}" method="POST" class="d-inline">
+                        <form action="{{ route('permohonan.submit', $permohonan) }}" method="POST" class="w-100 w-sm-auto">
                             @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('Yakin ingin mengajukan permohonan ini?')">
+                            <button type="submit" class="btn btn-success w-100" onclick="return confirm('Yakin ingin mengajukan permohonan ini?')">
                                 <i class="bi bi-check-circle"></i> Ajukan
                             </button>
                         </form>
                     @elseif (str_contains($permohonan->status, 'Ditolak'))
-                        <form action="{{ route('permohonan.submit', $permohonan) }}" method="POST" class="d-inline">
+                        <form action="{{ route('permohonan.submit', $permohonan) }}" method="POST" class="w-100 w-sm-auto">
                             @csrf
-                            <button type="submit" class="btn btn-info" onclick="return confirm('Yakin ingin mengirim revisi permohonan ini?')">
+                            <button type="submit" class="btn btn-info w-100" onclick="return confirm('Yakin ingin mengirim revisi permohonan ini?')">
                                 <i class="bi bi-arrow-repeat"></i> Kirim Revisi
                             </button>
                         </form>
@@ -106,6 +106,15 @@
                     <a href="{{ route('print.preview', $permohonan) }}" class="btn btn-success">
                         <i class="bi bi-printer"></i> Print
                     </a>
+                @endif
+                @if (auth()->user()->hasRole('operator') && $permohonan->canBeDeletedByOperator())
+                    <form action="{{ route('permohonan.destroy-expired', $permohonan) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus data reklame kedaluwarsa ini dari peta? Tindakan ini hanya untuk pembersihan manual oleh operator.')">
+                            <i class="bi bi-trash"></i> Hapus dari Peta
+                        </button>
+                    </form>
                 @endif
             </div>
         @endif
@@ -222,15 +231,8 @@
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-file-earmark-check"></i> Persyaratan Dokumen</h5>
                 <div>
-                    {{-- Upload button untuk Pemohon --}}
-                    @if (auth()->user()->hasRole('pemohon') && $permohonan->user_id === auth()->id())
-                        <a href="{{ route('document-requirements.create', $permohonan) }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-upload"></i> Upload Dokumen
-                        </a>
-                    @endif
-
-                    {{-- Verifikasi button untuk Staff --}}
-                    @if (auth()->user()->hasAnyRole(['operator', 'kepala_seksi', 'kepala_bidang', 'admin']))
+                    {{-- Verifikasi button untuk Operator saja --}}
+                    @if (auth()->user()->hasRole('operator'))
                         <a href="{{ route('approval.verify', $permohonan) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-check-circle"></i> Verifikasi
                         </a>
@@ -301,18 +303,39 @@
                                         @if ($item->file_dokumen)
                                             @php
                                                 $extension = strtolower(pathinfo($item->file_dokumen, PATHINFO_EXTENSION));
-                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif']);
+                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                $isFotoReklame = $item->jenis_persyaratan === \App\Models\PersyaratanDokumen::JENIS_FOTO_KONDISI_REKLAME;
                                             @endphp
-                                            <div class="btn-group btn-group-sm">
-                                                @if($isImage)
-                                                    <a href="{{ route('document-requirements.preview', $item) }}" class="btn btn-outline-info" title="Lihat dokumen" target="_blank">
+                                            @if ($isFotoReklame && $isImage)
+                                                <div class="d-flex flex-column flex-sm-row align-items-start gap-2">
+                                                    <a href="{{ route('document-requirements.preview', $item) }}" class="btn btn-sm btn-outline-info" title="Lihat preview foto" target="_blank" rel="noopener">
                                                         <i class="bi bi-eye"></i>
                                                     </a>
-                                                @endif
-                                                <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-outline-primary" title="Download dokumen">
-                                                    <i class="bi bi-download"></i>
-                                                </a>
-                                            </div>
+                                                    <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-sm btn-outline-primary align-self-start" title="Download dokumen">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                </div>
+                                            @elseif ($isFotoReklame && $extension === 'pdf')
+                                                <div class="d-flex flex-column gap-2" style="max-width:min(320px,100%);">
+                                                    <div class="border rounded overflow-hidden bg-white" style="height:200px;">
+                                                        <embed src="{{ route('document-requirements.preview', $item) }}" type="application/pdf" width="100%" height="100%" />
+                                                    </div>
+                                                    <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-sm btn-outline-primary align-self-start" title="Download dokumen">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                </div>
+                                            @else
+                                                <div class="btn-group btn-group-sm">
+                                                    @if($isImage)
+                                                        <a href="{{ route('document-requirements.preview', $item) }}" class="btn btn-outline-info" title="Lihat dokumen" target="_blank">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    @endif
+                                                    <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-outline-primary" title="Download dokumen">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                </div>
+                                            @endif
                                         @else
                                             <small class="text-muted">-</small>
                                         @endif
@@ -336,7 +359,7 @@
                                 {{ $item->catatan_penolakan }}
                             </div>
                         @endforeach
-                        <p class="mb-0 mt-3">Silakan perbaiki dokumen yang ditolak dan upload kembali melalui tombol <strong>Upload Dokumen</strong> di atas.</p>
+                        <p class="mb-0 mt-3">Silakan perbaiki dokumen yang ditolak melalui halaman edit permohonan, lalu upload kembali di bagian persyaratan dokumen.</p>
                     </div>
                 @endif
             </div>

@@ -6,6 +6,7 @@ use App\Models\PermohonanReklame;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -13,7 +14,7 @@ class DashboardController extends Controller
     /**
      * Show dashboard based on user role.
      */
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
         $user = auth()->user();
         if (!$user->relationLoaded('role')) {
@@ -31,6 +32,8 @@ class DashboardController extends Controller
             return $this->kepalaBidangDashboard();
         } elseif ($userRole === 'admin') {
             return $this->adminDashboard();
+        } elseif ($userRole === 'satpol_pp') {
+            return redirect()->route('satpol-pp.map');
         }
 
         abort(403, 'Role tidak dikenali');
@@ -93,14 +96,25 @@ class DashboardController extends Controller
         $pendingPermohonan = PermohonanReklame::whereIn('status', ['Diajukan', 'Revisi Menunggu Verifikasi'])
             ->with('user') // Eager load user relation
             ->orderBy('created_at', 'asc')
-            ->limit(10)
+            ->limit(5)
             ->get();
 
-        // Permohonan yang sudah direvisi (untuk tab terpisah) dengan eager loading
+        // Preview revisi yang masih perlu tindakan operator
         $revisiPermohonan = PermohonanReklame::where('status', 'Revisi Menunggu Verifikasi')
             ->with('user') // Eager load user relation
             ->orderBy('created_at', 'asc')
-            ->paginate(10);
+            ->limit(5)
+            ->get();
+
+        $siapCetak = PermohonanReklame::where('status', 'Disetujui Kepala Bidang')->count();
+        $kedaluwarsaMap = PermohonanReklame::where('status', 'Disetujui Kepala Bidang')
+            ->whereNotNull('tanggal_berakhir')
+            ->whereDate('tanggal_berakhir', '<', now()->toDateString())
+            ->where(function ($query) {
+                $query->whereNull('status_kedaluwarsa')
+                    ->orWhere('status_kedaluwarsa', '!=', 'Dicabut');
+            })
+            ->count();
 
         return view('dashboard.operator', compact(
             'totalPermohonan',
@@ -109,7 +123,9 @@ class DashboardController extends Controller
             'revisiMenunggu',
             'ditolak',
             'pendingPermohonan',
-            'revisiPermohonan'
+            'revisiPermohonan',
+            'siapCetak',
+            'kedaluwarsaMap'
         ));
     }
 

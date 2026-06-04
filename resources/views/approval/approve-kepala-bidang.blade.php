@@ -2,6 +2,66 @@
 
 @section('title', 'Approval Kepala Bidang - ' . $permohonan->nomor_registrasi)
 
+@push('styles')
+<style>
+    .doc-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .doc-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .doc-card-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .doc-card-body {
+        padding: 1.25rem;
+    }
+
+    .doc-preview {
+        width: 100%;
+        height: 200px;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        overflow: hidden;
+        border: 2px dashed #e5e7eb;
+    }
+
+    .doc-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .doc-preview-empty {
+        text-align: center;
+        color: #9ca3af;
+    }
+
+    .doc-preview-empty i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-sidebar {
+        position: sticky;
+        top: 20px;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="header-page">
     <h1><i class="bi bi-check-circle"></i> Approval Akhir Kepala Bidang</h1>
@@ -15,120 +75,229 @@
                 <form method="POST" action="{{ route('approval.approve-bidang.store', $permohonan) }}">
                     @csrf
 
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-info-circle"></i> Data Permohonan</h5>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Nomor Registrasi</label>
-                            <p class="fw-bold">{{ $permohonan->nomor_registrasi }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Status Saat Ini</label>
-                            <p><span class="badge bg-info">{{ $permohonan->status }}</span></p>
-                        </div>
-                    </div>
+                    <ul class="nav nav-tabs mb-4" id="verifikasiTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="detail-tab" data-bs-toggle="tab" data-bs-target="#detail" type="button" role="tab">
+                                <i class="bi bi-person-vcard"></i> Detail Pemohon
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="dokumen-tab" data-bs-toggle="tab" data-bs-target="#dokumen" type="button" role="tab">
+                                <i class="bi bi-file-earmark-check"></i> Dokumen & Final Approval
+                            </button>
+                        </li>
+                    </ul>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Nama Pemohon</label>
-                            <p class="fw-bold">{{ $permohonan->nama_pemohon }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">NIK</label>
-                            <p class="fw-bold">{{ $permohonan->nik }}</p>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">Jenis Reklame</label>
-                        <p class="fw-bold">{{ $permohonan->jenis_reklame }}</p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">Lokasi Pemasangan</label>
-                        <p>{{ $permohonan->lokasi_pemasangan }}</p>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small text-muted">Narasi Reklame</label>
-                        <p>{{ $permohonan->narasi_reklame }}</p>
-                    </div>
-
-                    <hr>
-
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-pencil-square"></i> Keputusan Akhir</h5>
-
-                    <div class="alert alert-warning" role="alert">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Perhatian:</strong> Ini adalah tahap approval akhir. Keputusan Anda akan menentukan status permohonan secara final.
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Keputusan <span class="text-danger">*</span></label>
-                        <div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="keputusan" id="disetujui" value="Disetujui" required>
-                                <label class="form-check-label" for="disetujui">
-                                    <strong style="color: #198754;">✓ Disetujui</strong> - Permohonan DITERIMA dan sertifikat dapat dicetak
-                                </label>
+                    <div class="tab-content" id="verifikasiTabContent">
+                        <div class="tab-pane fade show active" id="detail" role="tabpanel">
+                            <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-info-circle"></i> Data Permohonan</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Nama Pemohon</label>
+                                    <p class="mb-0"><strong>{{ $permohonan->nama_pemohon }}</strong></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">NIK</label>
+                                    <p class="mb-0"><strong>{{ $permohonan->nik }}</strong></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Alamat</label>
+                                    <p class="mb-0">{{ $permohonan->alamat_pemohon }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Nomor Telepon</label>
+                                    <p class="mb-0">{{ $permohonan->nomor_telepon }}</p>
+                                </div>
+                                @if ($permohonan->npwp)
+                                    <div class="col-md-6 mb-3">
+                                        <label class="text-muted small">NPWP</label>
+                                        <p class="mb-0">{{ $permohonan->npwp }}</p>
+                                    </div>
+                                @endif
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="keputusan" id="ditolak" value="Ditolak">
-                                <label class="form-check-label" for="ditolak">
-                                    <strong style="color: #dc3545;">✗ Ditolak</strong> - Permohonan DITOLAK, kembalikan ke pemohon
-                                </label>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-signpost-split"></i> Data Reklame</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Jenis Reklame</label>
+                                    <p class="mb-0"><strong>{{ $permohonan->jenis_reklame }}</strong></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Jumlah Reklame</label>
+                                    <p class="mb-0"><strong>{{ $permohonan->jumlah_reklame }}</strong></p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Ukuran Reklame</label>
+                                    <p class="mb-0">{{ $permohonan->ukuran_reklame }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-muted small">Narasi Reklame</label>
+                                    <p class="mb-0">{{ $permohonan->narasi_reklame }}</p>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="text-muted small">Lokasi Pemasangan</label>
+                                    <p class="mb-0">{{ $permohonan->lokasi_pemasangan }}</p>
+                                </div>
+                            </div>
+
+                            @if ($permohonan->status === 'Disetujui Kepala Bidang')
+                                <hr class="my-4">
+                                <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-calendar-event"></i> Masa Berlaku Surat</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="text-muted small">Tanggal Berlaku</label>
+                                        <p class="mb-0"><strong>{{ $permohonan->tanggal_berlaku ? \Carbon\Carbon::parse($permohonan->tanggal_berlaku)->format('d F Y') : '-' }}</strong></p>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="text-muted small">Tanggal Berakhir</label>
+                                        <p class="mb-0"><strong>{{ $permohonan->tanggal_berakhir ? \Carbon\Carbon::parse($permohonan->tanggal_berakhir)->format('d F Y') : '-' }}</strong></p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label class="text-muted small">Status Kedaluwarsa</label>
+                                        @php $statusKedaluarsa = $permohonan->getStatusKedaluarsa(); @endphp
+                                        <p class="mb-0">
+                                            @if($statusKedaluarsa === 'Aktif')
+                                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> AKTIF</span>
+                                                <small class="text-muted d-block mt-2">Surat masih berlaku dan dapat digunakan.</small>
+                                            @elseif($statusKedaluarsa === 'Kedaluwarsa')
+                                                <span class="badge bg-danger"><i class="bi bi-exclamation-circle"></i> KEDALUWARSA</span>
+                                                <small class="text-muted d-block mt-2">Surat sudah tidak berlaku dan perlu pembaruan.</small>
+                                            @else
+                                                <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> DICABUT</span>
+                                                <small class="text-muted d-block mt-2">Surat telah dicabut oleh pihak berwenang.</small>
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="tab-pane fade" id="dokumen" role="tabpanel">
+                            <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-file-earmark"></i> Daftar Dokumen Persyaratan</h5>
+
+                            @if($persyaratan->isEmpty())
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> Belum ada dokumen yang diupload oleh pemohon.
+                                </div>
+                            @else
+                                <div class="row">
+                                    @foreach($persyaratan as $item)
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">{{ $item->jenis_persyaratan }}</h6>
+
+                                                    @if($item->file_dokumen)
+                                                        <p class="mb-2 small text-muted">{{ basename($item->file_dokumen) }}</p>
+                                                    @endif
+
+                                                    <div class="mb-2">
+                                                        <label class="form-label small mb-2"><strong>Status Dokumen:</strong></label>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="persyaratan[{{ $item->id }}][status]" id="lengkap_{{ $item->id }}" value="Lengkap" {{ $item->status === 'Lengkap' ? 'checked' : '' }}>
+                                                            <label class="form-check-label small" for="lengkap_{{ $item->id }}"><span style="color: #198754;">✓ Lengkap</span></label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="persyaratan[{{ $item->id }}][status]" id="belum_{{ $item->id }}" value="Belum Lengkap" {{ $item->status === 'Belum Lengkap' || $item->status !== 'Lengkap' ? 'checked' : '' }}>
+                                                            <label class="form-check-label small" for="belum_{{ $item->id }}"><span style="color: #ffc107;">⚠ Belum Lengkap</span></label>
+                                                        </div>
+                                                    </div>
+
+                                                    @if($item->file_dokumen)
+                                                        <div class="d-flex gap-2 mt-2">
+                                                            <a href="{{ route('document-requirements.download', $item) }}" class="btn btn-sm btn-outline-primary" title="Download">
+                                                                <i class="bi bi-download"></i> Download
+                                                            </a>
+                                                            @php
+                                                                $fileExt = strtolower(pathinfo($item->file_dokumen, PATHINFO_EXTENSION));
+                                                                $isImage = in_array($fileExt, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                                $isPdf = $fileExt === 'pdf';
+                                                            @endphp
+                                                            @if($isImage)
+                                                                <a href="{{ route('document-requirements.preview', $item) }}" class="btn btn-sm btn-outline-info" target="_blank" title="Preview">
+                                                                    <i class="bi bi-eye"></i> Preview
+                                                                </a>
+                                                            @elseif($isPdf)
+                                                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#previewModal{{ $item->id }}" title="Preview PDF">
+                                                                    <i class="bi bi-eye"></i> Preview
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <hr class="my-4">
+                            <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-calendar-event"></i> Cek Masa Berlaku (Ditetapkan Operator)</h5>
+
+                            @if($permohonan->tanggal_berlaku && $permohonan->tanggal_berakhir)
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="text-muted small">Tanggal Berlaku</label>
+                                        <p class="mb-0"><strong>{{ \Carbon\Carbon::parse($permohonan->tanggal_berlaku)->format('d F Y') }}</strong></p>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="text-muted small">Tanggal Berakhir</label>
+                                        <p class="mb-0"><strong>{{ \Carbon\Carbon::parse($permohonan->tanggal_berakhir)->format('d F Y') }}</strong></p>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Masa berlaku belum diatur Operator. Approval tidak dapat dilanjutkan sebelum data ini diisi.
+                                </div>
+                            @endif
+
+                            <hr class="my-4">
+                            <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-pencil-square"></i> Keputusan Final</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label">Keputusan <span class="text-danger">*</span></label>
+                                <div id="keputusanContainer">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="keputusan" id="disetujui" value="Disetujui" required>
+                                        <label class="form-check-label" for="disetujui">
+                                            <strong style="color: #198754;">✓ Disetujui</strong> - Lanjut ke status final
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="keputusan" id="ditolak" value="Ditolak">
+                                        <label class="form-check-label" for="ditolak">
+                                            <strong style="color: #dc3545;">✗ Ditolak</strong> - Kembalikan ke pemohon
+                                        </label>
+                                    </div>
+                                </div>
+                                <small class="text-danger d-none" id="keputusanError">Harus memilih keputusan (Disetujui atau Ditolak)</small>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="keterangan" class="form-label">Keterangan <span class="text-danger" id="keteranganRequired" style="display: none;">*</span></label>
+                                <textarea class="form-control" id="keterangan" name="keterangan" rows="4" placeholder="Tuliskan keterangan atau alasan keputusan Anda..."></textarea>
+                                <small class="text-danger d-none" id="keteranganError">Keterangan wajib diisi jika memilih Ditolak</small>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                    <i class="bi bi-check-circle"></i> Simpan Keputusan
+                                </button>
+                                <a href="{{ route('approval.dashboard') }}" class="btn btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Batal
+                                </a>
+                                <div class="ms-auto">
+                                    <small id="autoSaveIndicator" class="text-success d-none">
+                                        <i class="bi bi-check-circle-fill"></i> Tersimpan otomatis
+                                    </small>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="keterangan" class="form-label">Keterangan / Alasan Penolakan</label>
-                        <textarea class="form-control @error('keterangan') is-invalid @enderror" 
-                            id="keterangan" name="keterangan" rows="4" placeholder="Tuliskan alasan jika ditolak...">{{ old('keterangan') }}</textarea>
-                        @error('keterangan')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <hr>
-
-                    <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-calendar-event"></i> Masa Berlaku Surat</h5>
-
-                    <p class="small text-muted mb-3">Isi tanggal berlaku dan berakhir jika permohonan DISETUJUI. Dokumen ini akan otomatis ditandai kedaluwarsa setelah tanggal berakhir.</p>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggal_berlaku" class="form-label">Tanggal Berlaku <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('tanggal_berlaku') is-invalid @enderror" 
-                                id="tanggal_berlaku" name="tanggal_berlaku" value="{{ old('tanggal_berlaku') }}">
-                            <small class="text-muted d-block mt-1">Tanggal mulai surat persetujuan berlaku</small>
-                            @error('tanggal_berlaku')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="tanggal_berakhir" class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('tanggal_berakhir') is-invalid @enderror" 
-                                id="tanggal_berakhir" name="tanggal_berakhir" value="{{ old('tanggal_berakhir') }}">
-                            <small class="text-muted d-block mt-1">Tanggal akhir surat persetujuan berlaku</small>
-                            @error('tanggal_berakhir')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        <strong>Contoh:</strong> Jika Anda menginginkan surat berlaku selama 1 tahun, set Tanggal Berlaku hari ini dan Tanggal Berakhir setahun mendatang.
-                    </div>
-
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Kirim Keputusan Akhir
-                        </button>
-                        <a href="{{ route('approval.dashboard') }}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> Batal
-                        </a>
                     </div>
                 </form>
             </div>
@@ -136,145 +305,111 @@
     </div>
 
     <div class="col-lg-4">
-        <div class="card bg-light">
-            <div class="card-body">
-                <h6 class="card-title">Status Approval</h6>
-                <div class="timeline-simple">
-                    <div class="timeline-item completed">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <p class="small fw-bold">Operator</p>
-                            <p class="small text-muted">Diverifikasi</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item completed">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <p class="small fw-bold">Kepala Seksi</p>
-                            <p class="small text-muted">Disetujui</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item active">
-                        <div class="timeline-marker bg-primary"></div>
-                        <div class="timeline-content">
-                            <p class="small fw-bold">Kepala Bidang</p>
-                            <p class="small text-muted">Proses Approval Akhir</p>
-                        </div>
-                    </div>
-                </div>
+        <div class="card sticky-top info-sidebar" style="top: 20px;">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Informasi Permohonan</h5>
             </div>
-        </div>
-
-        <div class="card mt-3">
-            <div class="card-body">
-                <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
-                <small class="text-muted">
-                    <ul class="mb-0">
-                        <li>Review semua data yang telah diverifikasi</li>
-                        <li>Ini adalah approval AKHIR dan tidak dapat diubah</li>
-                        <li>Setujui jika semuanya sudah lengkap dan sesuai</li>
-                        <li>Keputusan akan langsung dikirim kepada pemohon</li>
-                        <li>Sertifikat dapat dicetak setelah approval</li>
-                    </ul>
-                </small>
+            <div class="card-body small">
+                <p class="mb-2"><strong>Nomor Registrasi:</strong><br>{{ $permohonan->nomor_registrasi }}</p>
+                <p class="mb-2"><strong>Nama Pemohon:</strong><br>{{ $permohonan->nama_pemohon }}</p>
+                <p class="mb-2"><strong>NIK:</strong><br>{{ $permohonan->nik }}</p>
+                <p class="mb-2"><strong>Jenis Reklame:</strong><br>{{ $permohonan->jenis_reklame }}</p>
+                <p class="mb-2"><strong>Lokasi:</strong><br>{{ $permohonan->lokasi_pemasangan }}</p>
+                <hr>
+                <p class="mb-0 text-muted"><strong>Tanggal Pengajuan:</strong><br>{{ $permohonan->created_at->format('d M Y H:i') }}</p>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .header-page {
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #1a5490;
-    }
-
-    .header-page h1 {
-        color: #1a5490;
-        font-weight: bold;
-    }
-
-    .timeline-simple {
-        position: relative;
-        padding: 0;
-    }
-
-    .timeline-item {
-        display: flex;
-        margin-bottom: 1.5rem;
-        position: relative;
-    }
-
-    .timeline-marker {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        margin-right: 1rem;
-        flex-shrink: 0;
-        margin-top: 0.25rem;
-    }
-
-    .timeline-item.completed .timeline-marker {
-        background-color: #198754 !important;
-    }
-
-    .timeline-item.active .timeline-marker {
-        background-color: #0d6efd !important;
-    }
-</style>
+@foreach($persyaratan as $item)
+    @if($item->file_dokumen)
+        @php
+            $fileExt = strtolower(pathinfo($item->file_dokumen, PATHINFO_EXTENSION));
+            $isPdf = $fileExt === 'pdf';
+        @endphp
+        @if($isPdf)
+        <div class="modal fade" id="previewModal{{ $item->id }}" tabindex="-1" aria-labelledby="previewModalLabel{{ $item->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="previewModalLabel{{ $item->id }}">Preview {{ $item->jenis_persyaratan }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0" style="height: 80vh;">
+                        <iframe src="{{ route('document-requirements.preview', $item) }}" width="100%" height="100%" style="border:0;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
+@endforeach
+@endsection
 
 @push('scripts')
 <script>
-    // Form validation & conditional requirement
-    document.addEventListener('DOMContentLoaded', function() {
-        const disetujuiRadio = document.getElementById('disetujui');
-        const ditolakRadio = document.getElementById('ditolak');
-        const tanggalBerlakuInput = document.getElementById('tanggal_berlaku');
-        const tanggalBerakhirInput = document.getElementById('tanggal_berakhir');
-        const keteranganInput = document.getElementById('keterangan');
-        
-        function updateFieldRequirements() {
-            if (disetujuiRadio.checked) {
-                tanggalBerlakuInput.required = true;
-                tanggalBerakhirInput.required = true;
-                tanggalBerlakuInput.closest('.col-md-6').style.opacity = '1';
-                tanggalBerakhirInput.closest('.col-md-6').style.opacity = '1';
-                keteranganInput.required = false;
-            } else {
-                tanggalBerlakuInput.required = false;
-                tanggalBerakhirInput.required = false;
-                tanggalBerlakuInput.closest('.col-md-6').style.opacity = '0.6';
-                tanggalBerakhirInput.closest('.col-md-6').style.opacity = '0.6';
-                keteranganInput.required = true;
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    const keputusanRadios = document.querySelectorAll('input[name="keputusan"]');
+    const keteranganField = document.getElementById('keterangan');
+    const keteranganRequired = document.getElementById('keteranganRequired');
+    const keteranganError = document.getElementById('keteranganError');
+    const keputusanError = document.getElementById('keputusanError');
+
+    function validateForm() {
+        const keputusanSelected = Array.from(keputusanRadios).some(radio => radio.checked);
+        const ditolakSelected = document.getElementById('ditolak').checked;
+        const keteranganFilled = keteranganField.value.trim() !== '';
+
+        let isValid = keputusanSelected;
+
+        if (ditolakSelected && !keteranganFilled) {
+            isValid = false;
+            keteranganError.classList.remove('d-none');
+        } else {
+            keteranganError.classList.add('d-none');
         }
-        
-        // Set min date untuk tanggal_berlaku to today
-        const today = new Date().toISOString().split('T')[0];
-        tanggalBerlakuInput.min = today;
-        
-        // Validate tanggal_berakhir > tanggal_berlaku
-        tanggalBerlakuInput.addEventListener('change', function() {
-            const berlakuDate = new Date(this.value);
-            const berakhirDate = new Date(tanggalBerakhirInput.value);
-            
-            // Set min tanggal_berakhir to day after berlaku
-            const minBerakhir = new Date(berlakuDate);
-            minBerakhir.setDate(minBerakhir.getDate() + 1);
-            tanggalBerakhirInput.min = minBerakhir.toISOString().split('T')[0];
-            
-            if (tanggalBerakhirInput.value && berakhirDate <= berlakuDate) {
-                tanggalBerakhirInput.value = '';
-                alert('Tanggal Berakhir harus setelah Tanggal Berlaku');
-            }
-        });
-        
-        disetujuiRadio.addEventListener('change', updateFieldRequirements);
-        ditolakRadio.addEventListener('change', updateFieldRequirements);
-        
-        // Initial state
-        updateFieldRequirements();
+
+        if (!keputusanSelected) {
+            keputusanError.classList.remove('d-none');
+        } else {
+            keputusanError.classList.add('d-none');
+        }
+
+        keteranganField.required = ditolakSelected;
+        keteranganRequired.style.display = ditolakSelected ? 'inline' : 'none';
+        submitBtn.disabled = !isValid;
+    }
+
+    keputusanRadios.forEach(radio => {
+        radio.addEventListener('change', validateForm);
     });
+
+    keteranganField.addEventListener('input', validateForm);
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const keputusanSelected = Array.from(keputusanRadios).some(radio => radio.checked);
+        const ditolakSelected = document.getElementById('ditolak').checked;
+        const keteranganFilled = keteranganField.value.trim() !== '';
+
+        if (!keputusanSelected) {
+            keputusanError.classList.remove('d-none');
+            return;
+        }
+
+        if (ditolakSelected && !keteranganFilled) {
+            keteranganError.classList.remove('d-none');
+            return;
+        }
+
+        form.submit();
+    });
+
+    validateForm();
+});
 </script>
 @endpush
-@endsection

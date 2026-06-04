@@ -119,7 +119,7 @@
             </form>
 
             <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout', [], false) }}">
                     @csrf
                     <button type="submit" style="background: none; border: none; color: #0284c7; font-weight: 600; cursor: pointer; font-size: 0.9rem;">
                         <i class="bi bi-box-arrow-left"></i> Logout & Kembali

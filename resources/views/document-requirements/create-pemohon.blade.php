@@ -97,6 +97,15 @@
                                             <span class="{{ $statusClass }}">{{ $displayStatus }}</span>
                                         </div>
 
+                                        <div class="mb-3">
+                                            <small class="text-muted d-block">Status unggahan:</small>
+                                            @if($req->file_dokumen)
+                                                <span class="badge bg-success">Sudah diupload</span>
+                                            @else
+                                                <span class="badge bg-warning text-dark">Belum diupload</span>
+                                            @endif
+                                        </div>
+
                                         @if($req->status === 'Ditolak' && $req->catatan_penolakan)
                                             <div class="alert alert-danger py-2 px-3 mb-3" style="font-size: 0.85rem;">
                                                 <strong>Catatan penolakan:</strong> {{ $req->catatan_penolakan }}

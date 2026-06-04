@@ -9,7 +9,9 @@
             <button class="btn btn-primary" type="submit">Cari</button>
         </div>
     </form>
-    @if($permohonan->count())
+    @if(blank($query))
+        <div class="alert alert-info">Masukkan kata kunci untuk mulai mencari permohonan.</div>
+    @elseif($permohonan->count())
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>

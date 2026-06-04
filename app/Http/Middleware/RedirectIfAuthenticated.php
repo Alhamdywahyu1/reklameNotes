@@ -22,6 +22,14 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
+                if ($request->routeIs('login', 'register')) {
+                    Auth::guard($guard)->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return $next($request);
+                }
+
                 return redirect(route('dashboard'));
             }
         }

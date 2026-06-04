@@ -23,6 +23,17 @@ class Kernel extends ConsoleKernel
                 ->dailyAt('08:00')
                 ->withoutOverlapping();
         }
+
+        // Kirim reminder masa berlaku reklame yang akan berakhir 10 hari lagi
+        $schedule->command('permohonan:send-expiry-reminder --days=10')
+            ->dailyAt('08:10')
+            ->withoutOverlapping()
+            ->description('Kirim reminder masa berlaku reklame H-10 ke pemohon');
+
+        $schedule->command('permohonan:send-expiry-reminder --days=3')
+            ->dailyAt('08:20')
+            ->withoutOverlapping()
+            ->description('Kirim reminder masa berlaku reklame H-3 ke pemohon');
     }
 
     /**

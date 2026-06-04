@@ -55,6 +55,8 @@ class ApprovalController extends Controller
             'persyaratan.*.status' => 'sometimes|in:Lengkap,Belum Lengkap',
             'keputusan' => 'required|in:Disetujui,Ditolak',
             'keterangan' => 'nullable|string',
+            'tanggal_berlaku' => 'nullable|date|required_if:keputusan,Disetujui',
+            'tanggal_berakhir' => 'nullable|date|after:tanggal_berlaku|required_if:keputusan,Disetujui',
         ]);
 
         // Update persyaratan dokumen status
@@ -79,6 +81,11 @@ class ApprovalController extends Controller
             $permohonan->rejected_by_role_id = auth()->user()->role_id;
             $permohonan->rejected_by_user_id = auth()->id();
         } else {
+            $permohonan->tanggal_berlaku = $validated['tanggal_berlaku'];
+            $permohonan->tanggal_berakhir = $validated['tanggal_berakhir'];
+            $permohonan->status_kedaluwarsa = 'Aktif';
+            $permohonan->expiry_reminder_sent_at = null;
+            $permohonan->expiry_reminder_h3_sent_at = null;
             // Clear rejection tracking ketika approved
             $permohonan->rejected_by_role_id = null;
             $permohonan->rejected_by_user_id = null;
@@ -106,7 +113,12 @@ class ApprovalController extends Controller
             'model_id' => $permohonan->id,
             'description' => "Verifikasi operator permohonan {$permohonan->nomor_registrasi}: {$validated['keputusan']}",
             'old_values' => ['status' => $oldStatus],
-            'new_values' => ['status' => $newStatus, 'keputusan' => $validated['keputusan']],
+            'new_values' => [
+                'status' => $newStatus,
+                'keputusan' => $validated['keputusan'],
+                'tanggal_berlaku' => $validated['tanggal_berlaku'] ?? null,
+                'tanggal_berakhir' => $validated['tanggal_berakhir'] ?? null,
+            ],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'created_at' => now(),
@@ -203,9 +215,35 @@ class ApprovalController extends Controller
         }
 
         $validated = $request->validate([
+            'persyaratan.*.status' => 'sometimes|in:Lengkap,Belum Lengkap',
             'keputusan' => 'required|in:Disetujui,Ditolak',
             'keterangan' => 'nullable|string',
         ]);
+
+        if (
+            $validated['keputusan'] === 'Disetujui'
+            && (
+                !$permohonan->tanggal_berlaku
+                || !$permohonan->tanggal_berakhir
+                || $permohonan->tanggal_berakhir->lte($permohonan->tanggal_berlaku)
+            )
+        ) {
+            return back()->withErrors([
+                'keputusan' => 'Masa berlaku harus diatur valid oleh Operator terlebih dahulu sebelum disetujui Kepala Seksi.',
+            ])->withInput();
+        }
+
+        // Samakan dengan operator: simpan status dokumen dari form saat submit
+        if (isset($validated['persyaratan'])) {
+            foreach ($validated['persyaratan'] as $id => $data) {
+                $permohonan->persyaratanDokumen()
+                    ->where('id', $id)
+                    ->update([
+                        'status' => $data['status'] ?? 'Belum Lengkap',
+                        'is_lengkap' => ($data['status'] ?? '') === 'Lengkap',
+                    ]);
+            }
+        }
 
         $newStatus = $validated['keputusan'] === 'Disetujui' ? 'Disetujui Kepala Seksi' : 'Ditolak Kepala Seksi';
         $oldStatus = $permohonan->status;
@@ -267,12 +305,21 @@ class ApprovalController extends Controller
      */
     public function approveKepalaBidang(PermohonanReklame $permohonan): View
     {
-        // Temporarily allow anyone logged in to see this page for testing
-        // if (!auth()->user()->hasAnyRole(['kepala_bidang', 'admin', 'operator', 'kepala_seksi'])) {
-        //     abort(403, 'Hanya staff yang dapat mengakses halaman ini');
-        // }
+        if (!auth()->user()->hasRole('kepala_bidang')) {
+            abort(403, 'Hanya Kepala Bidang yang dapat mengakses halaman ini');
+        }
 
-        return view('approval.approve-kepala-bidang', compact('permohonan'));
+        $persyaratan = $permohonan->persyaratanDokumen()
+            ->where(function ($query) {
+                $query->where('is_optional', false)
+                      ->orWhere(function ($q) {
+                          $q->where('is_optional', true)
+                            ->whereNotNull('file_dokumen');
+                      });
+            })
+            ->get();
+
+        return view('approval.approve-kepala-bidang', compact('permohonan', 'persyaratan'));
     }
 
     /**
@@ -280,17 +327,44 @@ class ApprovalController extends Controller
      */
     public function storeKepalaBidangApproval(Request $request, PermohonanReklame $permohonan): RedirectResponse
     {
-        // Relax check temporarily - allow any approval status
-        // if (!$permohonan->canBeApprovedByKepalaBidang()) {
-        //     abort(403);
-        // }
+        if (!auth()->user()->hasRole('kepala_bidang')) {
+            abort(403, 'Hanya Kepala Bidang yang dapat mengakses halaman ini');
+        }
+
+        if (!$permohonan->canBeApprovedByKepalaBidang()) {
+            return redirect()->route('approval.dashboard')
+                ->with('error', 'Permohonan tidak dapat diproses. Status saat ini: ' . $permohonan->status);
+        }
 
         $validated = $request->validate([
+            'persyaratan.*.status' => 'sometimes|in:Lengkap,Belum Lengkap',
             'keputusan' => 'required|in:Disetujui,Ditolak',
             'keterangan' => 'nullable|string',
-            'tanggal_berlaku' => 'nullable|date|required_if:keputusan,Disetujui',
-            'tanggal_berakhir' => 'nullable|date|after:tanggal_berlaku|required_if:keputusan,Disetujui',
         ]);
+
+        if (
+            $validated['keputusan'] === 'Disetujui'
+            && (
+                !$permohonan->tanggal_berlaku
+                || !$permohonan->tanggal_berakhir
+                || $permohonan->tanggal_berakhir->lte($permohonan->tanggal_berlaku)
+            )
+        ) {
+            return back()->withErrors([
+                'keputusan' => 'Masa berlaku dari Operator belum valid. Periksa kembali sebelum approval final.',
+            ])->withInput();
+        }
+
+        if (isset($validated['persyaratan'])) {
+            foreach ($validated['persyaratan'] as $id => $data) {
+                $permohonan->persyaratanDokumen()
+                    ->where('id', $id)
+                    ->update([
+                        'status' => $data['status'] ?? 'Belum Lengkap',
+                        'is_lengkap' => ($data['status'] ?? '') === 'Lengkap',
+                    ]);
+            }
+        }
 
         $newStatus = $validated['keputusan'] === 'Disetujui' ? 'Disetujui Kepala Bidang' : 'Ditolak Kepala Bidang';
         $oldStatus = $permohonan->status;
@@ -300,11 +374,6 @@ class ApprovalController extends Controller
             $permohonan->rejected_by_role_id = auth()->user()->role_id;
             $permohonan->rejected_by_user_id = auth()->id();
         } else {
-            // Set tanggal berlaku & berakhir jika disetujui
-            $permohonan->tanggal_berlaku = $validated['tanggal_berlaku'];
-            $permohonan->tanggal_berakhir = $validated['tanggal_berakhir'];
-            $permohonan->status_kedaluwarsa = 'Aktif';
-            
             // Clear rejection tracking ketika approved
             $permohonan->rejected_by_role_id = null;
             $permohonan->rejected_by_user_id = null;
@@ -330,7 +399,12 @@ class ApprovalController extends Controller
             'model_id' => $permohonan->id,
             'description' => "Final approval Kepala Bidang permohonan {$permohonan->nomor_registrasi}: {$validated['keputusan']}",
             'old_values' => ['status' => $oldStatus],
-            'new_values' => ['status' => $newStatus, 'keputusan' => $validated['keputusan'], 'tanggal_berlaku' => $validated['tanggal_berlaku'] ?? null, 'tanggal_berakhir' => $validated['tanggal_berakhir'] ?? null],
+            'new_values' => [
+                'status' => $newStatus,
+                'keputusan' => $validated['keputusan'],
+                'tanggal_berlaku' => optional($permohonan->tanggal_berlaku)->toDateString(),
+                'tanggal_berakhir' => optional($permohonan->tanggal_berakhir)->toDateString(),
+            ],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'created_at' => now(),
@@ -346,13 +420,8 @@ class ApprovalController extends Controller
         if ($validated['keputusan'] === 'Disetujui') {
             // Kalau operator, bisa langsung ke print surat
             // Kalau role lain (kepala_bidang, etc), balik ke approval dashboard
-            if (auth()->user()->hasRole('operator')) {
-                return redirect()->route('print.surat', $permohonan)
-                    ->with('success', 'Permohonan berhasil disetujui FINAL. Surat persetujuan sudah siap dicetak.');
-            } else {
-                return redirect()->route('approval.dashboard')
-                    ->with('success', 'Permohonan berhasil disetujui FINAL. Operator akan mencetak surat persetujuan.');
-            }
+            return redirect()->route('approval.dashboard')
+                ->with('success', 'Permohonan berhasil disetujui FINAL. Operator akan mencetak surat persetujuan.');
         } else {
             return redirect()->route('approval.dashboard')
                 ->with('success', 'Permohonan ditolak dan akan dikembalikan kepada pemohon');
@@ -392,7 +461,7 @@ class ApprovalController extends Controller
     /**
      * Show approval dashboard.
      */
-    public function dashboard(): View
+    public function dashboard(Request $request): View
     {
         $user = auth()->user();
         if (!$user->relationLoaded('role')) {
@@ -400,8 +469,8 @@ class ApprovalController extends Controller
         }
         $userRole = $user->role?->slug;
 
-        // Check if user has proper role
-        if (!$userRole || !in_array($userRole, ['operator', 'kepala_seksi', 'kepala_bidang', 'admin'])) {
+        // Check if user has proper role (exclude admin - they should use admin.dashboard)
+        if (!$userRole || !in_array($userRole, ['operator', 'kepala_seksi', 'kepala_bidang'])) {
             abort(403, 'Anda tidak memiliki akses ke fitur approval');
         }
 
@@ -414,19 +483,44 @@ class ApprovalController extends Controller
             $query->whereIn('status', ['Revisi Menunggu Kepala Seksi', 'Diverifikasi Operator', 'Disetujui Kepala Seksi', 'Ditolak Kepala Seksi']);
         } elseif ($userRole === 'kepala_bidang') {
             $query->whereIn('status', ['Revisi Menunggu Kepala Bidang', 'Disetujui Kepala Seksi', 'Disetujui Kepala Bidang', 'Ditolak Kepala Bidang']);
-        } elseif ($userRole === 'admin') {
-            // Admin can see everything
-            $query->whereNotNull('status');
+        }
+
+        $masaFilter = $request->query('masa_filter', 'all');
+
+        // Counts for quick-filter badges (scoped to current role/status view)
+        $baseForCounts = (clone $query);
+        $countMissing = (clone $baseForCounts)
+            ->where(function ($q) {
+                $q->whereNull('tanggal_berlaku')
+                  ->orWhereNull('tanggal_berakhir');
+            })->count();
+
+        $countInvalid = (clone $baseForCounts)
+            ->whereNotNull('tanggal_berlaku')
+            ->whereNotNull('tanggal_berakhir')
+            ->whereColumn('tanggal_berakhir', '<=', 'tanggal_berlaku')
+            ->count();
+
+        if ($masaFilter === 'missing') {
+            $query->where(function ($q) {
+                $q->whereNull('tanggal_berlaku')
+                    ->orWhereNull('tanggal_berakhir');
+            });
+        } elseif ($masaFilter === 'invalid') {
+            $query->whereNotNull('tanggal_berlaku')
+                ->whereNotNull('tanggal_berakhir')
+                ->whereColumn('tanggal_berakhir', '<=', 'tanggal_berlaku');
         }
 
         $permohonan = $query->orderBy('created_at', 'desc')->paginate(10);
+        $permohonan->appends($request->query());
 
         // Statistics
         $totalPermohonan = $query->count();
         $disetujui = PermohonanReklame::where('status', 'Disetujui Kepala Bidang')->count();
         $ditolak = PermohonanReklame::whereIn('status', ['Ditolak Operator', 'Ditolak Kepala Seksi'])->count();
 
-        return view('approval.dashboard', compact('permohonan', 'userRole', 'totalPermohonan', 'disetujui', 'ditolak'));
+        return view('approval.dashboard', compact('permohonan', 'userRole', 'totalPermohonan', 'disetujui', 'ditolak', 'masaFilter', 'countMissing', 'countInvalid'));
     }
 
     /**

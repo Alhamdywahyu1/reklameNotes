@@ -9,6 +9,45 @@
 </div>
 
 <div class="row g-5">
+    @if(env('OTP_VERIFICATION_ENABLED', true) && !auth()->user()->hasVerifiedEmail())
+    <div class="col-12">
+        <div class="alert alert-warning alert-dismissible fade show border-start border-warning border-4" role="alert">
+            <div class="d-flex gap-3">
+                <div>
+                    <i class="bi bi-exclamation-triangle-fill fs-5" style="color: #ffc107;"></i>
+                </div>
+                <div>
+                    <h6 class="alert-heading mb-2">⚠️ Email Belum Terverifikasi</h6>
+                    <p class="mb-0">Anda harus memverifikasi email terlebih dahulu sebelum dapat mengajukan permohonan reklame. Klik <a href="{{ route('otp.show') }}" class="fw-bold">di sini untuk verifikasi email</a> atau gunakan menu "Akun → Verifikasi Email" di navbar.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Modal untuk notifikasi verifikasi diperlukan -->
+    @if(env('OTP_VERIFICATION_ENABLED', true) && !auth()->user()->hasVerifiedEmail())
+    <div class="modal fade" id="verificationRequiredModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-warning text-white border-0">
+                    <h5 class="modal-title"><i class="bi bi-shield-exclamation"></i> Verifikasi Email Diperlukan</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Anda harus memverifikasi email Anda terlebih dahulu sebelum dapat mengajukan permohonan reklame.</p>
+                    <p class="mb-0 text-muted"><i class="bi bi-info-circle"></i> Email akan diverifikasi melalui kode OTP yang kami kirimkan ke alamat email Anda.</p>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="{{ route('otp.show') }}" class="btn btn-warning"><i class="bi bi-shield-check"></i> Verifikasi Sekarang</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="col-lg-8">
         <div class="card h-100">
             <div class="card-body p-5">
@@ -269,8 +308,8 @@
         </div>
     </div>
 
-    <div class="col-lg-4">
-        <div class="card bg-light h-100 sticky-top" style="top: 20px;">
+    <div class="col-lg-4 align-self-start">
+        <div class="card bg-light sticky-top" style="top: 20px;">
             <div class="card-body p-4">
                 <h5 class="card-title mb-3"><i class="bi bi-info-circle"></i> Informasi</h5>
                 <p class="small text-muted mb-4">Pastikan semua data yang Anda isi sudah benar sebelum mengajukan permohonan.</p>
@@ -347,6 +386,22 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+    // Check email verification on form submit (only when OTP verification enabled)
+    @if(env('OTP_VERIFICATION_ENABLED', true) && !auth()->user()->hasVerifiedEmail())
+    const permohonanForm = document.querySelector('form');
+    if (permohonanForm) {
+        permohonanForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show alert modal
+            const alertModal = new bootstrap.Modal(document.getElementById('verificationRequiredModal'));
+            alertModal.show();
+            
+            return false;
+        });
+    }
+    @endif
+
     // Initialize map
     const map = L.map('mapContainer').setView([-6.200000, 106.816666], 13);
     

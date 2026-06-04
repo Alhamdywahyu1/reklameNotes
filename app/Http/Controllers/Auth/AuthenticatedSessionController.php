@@ -74,7 +74,7 @@ class AuthenticatedSessionController extends Controller
             'keterangan' => 'User login berhasil',
         ]);
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->route('dashboard');
     }
 
     /**

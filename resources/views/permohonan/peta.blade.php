@@ -5,7 +5,7 @@
 @section('content')
 <div class="header-page">
     <h1><i class="bi bi-map"></i> Peta Digital Reklame</h1>
-    <p class="text-muted">Visualisasi lokasi semua permohonan reklame</p>
+    <p class="text-muted">Visualisasi titik reklame yang sudah disetujui Kepala Bidang dan siap dipantau di lapangan</p>
 </div>
 
 <div class="card">
@@ -20,25 +20,16 @@
             <div class="card-body">
                 <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi Peta</h6>
                 <p class="small text-muted mb-2">
-                    Peta menampilkan lokasi semua permohonan reklame yang telah diajukan.
+                    Peta menampilkan reklame yang sudah <strong>Disetujui Kepala Bidang</strong>. Titik <strong>hijau</strong> berarti izin masih aktif, sedangkan titik <strong>merah</strong> berarti masa berlaku sudah habis dan tetap tampil sampai dihapus manual oleh operator.
                 </p>
                 <hr>
                 <h6 class="small"><strong>Legenda:</strong></h6>
                 <div class="small text-muted">
                     <div class="mb-2">
-                        <span class="badge bg-secondary">Draft</span> - Permohonan masih dalam tahap draft
-                    </div>
-                    <div class="mb-2">
-                        <span class="badge bg-info">Diajukan</span> - Menunggu verifikasi
-                    </div>
-                    <div class="mb-2">
-                        <span class="badge bg-primary">Diverifikasi</span> - Dalam proses approval
-                    </div>
-                    <div class="mb-2">
-                        <span class="badge bg-danger">Ditolak</span> - Permohonan ditolak
+                        <span class="badge bg-success">Hijau</span> - Reklame sudah disetujui Kepala Bidang dan masih aktif
                     </div>
                     <div>
-                        <span class="badge bg-success">Disetujui</span> - Permohonan disetujui
+                        <span class="badge bg-danger">Merah</span> - Masa berlaku reklame sudah habis dan menunggu tindak lanjut/operator hapus manual
                     </div>
                 </div>
             </div>
@@ -59,21 +50,19 @@
                                         <h6 class="mb-1">{{ $item->nomor_registrasi }}</h6>
                                         <p class="mb-1 small text-muted">{{ $item->nama_pemohon }}</p>
                                         <small class="text-muted">{{ $item->lokasi_pemasangan }}</small>
+                                        @if($item->tanggal_berakhir)
+                                            <div class="small text-muted mt-1">
+                                                Berakhir: {{ $item->tanggal_berakhir->format('d M Y') }}
+                                            </div>
+                                        @endif
                                     </div>
                                     @php
-                                        $statusColors = [
-                                            'Draft' => '#6c757d',
-                                            'Diajukan' => '#0dcaf0',
-                                            'Diverifikasi Operator' => '#ffc107',
-                                            'Ditolak Operator' => '#dc3545',
-                                            'Ditolak Kepala Seksi' => '#dc3545',
-                                            'Disetujui Kepala Seksi' => '#0dcaf0',
-                                            'Disetujui Kepala Bidang' => '#198754',
-                                        ];
-                                        $color = $statusColors[$item->status] ?? '#0d6efd';
+                                        $isExpired = $item->isKedaluwarsa();
+                                        $color = $isExpired ? '#dc3545' : '#198754';
+                                        $label = $isExpired ? 'Masa Berlaku Habis' : 'Aktif';
                                     @endphp
                                     <span class="badge" style="background-color: {{ $color }};">
-                                        {{ $item->status }}
+                                        {{ $label }}
                                     </span>
                                 </div>
                             </a>
@@ -81,7 +70,7 @@
                     </div>
                 @else
                     <div class="alert alert-info mb-0">
-                        <i class="bi bi-info-circle"></i> Belum ada permohonan reklame dengan koordinat lokasi.
+                        <i class="bi bi-info-circle"></i> Belum ada reklame yang disetujui Kepala Bidang dengan koordinat lokasi.
                     </div>
                 @endif
             </div>
@@ -99,6 +88,20 @@
     #mapContainer {
         position: relative;
         z-index: 1;
+    }
+
+    .popup-detail-btn {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+        opacity: 1;
+    }
+
+    .popup-detail-btn:hover,
+    .popup-detail-btn:focus {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        color: #fff;
     }
 </style>
 @endpush
@@ -118,8 +121,21 @@
     // Create marker cluster group
     const markerClusterGroup = L.markerClusterGroup();
 
-    // Data permohonan dari server
-    const permohonanData = {!! json_encode($permohonan->map(function($item) {
+    // Data permohonan dari server (foto reklame = dokumen "Foto kondisi & visualisasi reklame")
+    const permohonanData = {!! json_encode($permohonan->map(function ($item) {
+        $fotoRow = $item->persyaratanDokumen->first();
+        $fotoPreviewUrl = null;
+        $fotoKind = null;
+        if ($fotoRow && $fotoRow->file_dokumen) {
+            $fotoPreviewUrl = route('document-requirements.preview', $fotoRow);
+            $ext = strtolower(pathinfo($fotoRow->file_dokumen, PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+                $fotoKind = 'image';
+            } elseif ($ext === 'pdf') {
+                $fotoKind = 'pdf';
+            }
+        }
+
         return [
             'id' => $item->id,
             'nomor_registrasi' => $item->nomor_registrasi,
@@ -129,14 +145,69 @@
             'lokasi_pemasangan' => $item->lokasi_pemasangan,
             'jenis_reklame' => $item->jenis_reklame,
             'status' => $item->status,
+            'tanggal_berlaku' => optional($item->tanggal_berlaku)->format('Y-m-d'),
+            'tanggal_berakhir' => optional($item->tanggal_berakhir)->format('Y-m-d'),
+            'status_kedaluwarsa' => $item->getStatusKedaluarsa(),
+            'is_kedaluwarsa' => $item->isKedaluwarsa(),
+            'status_approval_label' => $item->status === 'Sudah Terbit' ? 'Telah diprint oleh operator' : $item->status,
             'url' => route('permohonan.show', $item),
+            'foto_preview_url' => $fotoPreviewUrl,
+            'foto_kind' => $fotoKind,
         ];
-    })->toArray()) !!};
+    })->values()->toArray()) !!};
+
+    function escapeHtml(text) {
+        if (text === null || text === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function buildFotoReklameBlock(item) {
+        if (item.foto_preview_url && item.foto_kind === 'image') {
+            const safeUrl = String(item.foto_preview_url).replace(/"/g, '&quot;');
+            return `
+                <div class="mb-2 border rounded overflow-hidden bg-light">
+                    <img src="${safeUrl}" alt="Foto kondisi dan visualisasi reklame" loading="lazy"
+                        style="width:100%; max-height:320px; height:auto; object-fit:contain; display:block; vertical-align:middle;" />
+                </div>
+                <p class="small text-muted mb-0">Foto kondisi &amp; visualisasi reklame (unggahan pemohon).</p>`;
+        }
+        if (item.foto_preview_url && item.foto_kind === 'pdf') {
+            const safeUrl = String(item.foto_preview_url).replace(/"/g, '&quot;');
+            return `
+                <div class="mb-2 border rounded overflow-hidden bg-white" style="height:260px;">
+                    <embed src="${safeUrl}" type="application/pdf" width="100%" height="100%" style="display:block;" />
+                </div>
+                <p class="small text-muted mb-0">PDF unggahan pemohon (tampil langsung). Di beberapa ponsel PDF bisa tidak tampil di sini — gunakan unduh dari halaman detail.</p>`;
+        }
+        return `<p class="small text-muted mb-2"><i class="bi bi-image"></i> Belum ada unggahan &ldquo;Foto kondisi &amp; visualisasi reklame&rdquo;.</p>`;
+    }
+
+    function formatTanggalIndonesia(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString + 'T00:00:00');
+        if (Number.isNaN(date.getTime())) return dateString;
+
+        return new Intl.DateTimeFormat('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        }).format(date);
+    }
+
+    function getMarkerColor(item) {
+        return item.is_kedaluwarsa ? '#dc3545' : '#198754';
+    }
+
+    function getMarkerLabel(item) {
+        return item.is_kedaluwarsa ? 'Masa Berlaku Habis' : 'Aktif';
+    }
 
     // Add markers to cluster
     permohonanData.forEach(function(item) {
         if (item.latitude && item.longitude) {
-            const statusColor = getStatusColor(item.status);
+            const statusColor = getMarkerColor(item);
             const marker = L.circleMarker([item.latitude, item.longitude], {
                 radius: 8,
                 fillColor: statusColor,
@@ -147,18 +218,21 @@
             });
 
             const popup = `
-                <div style="min-width: 250px;">
-                    <h6>${item.nomor_registrasi}</h6>
-                    <p class="mb-2 small"><strong>Pemohon:</strong> ${item.nama_pemohon}</p>
-                    <p class="mb-2 small"><strong>Jenis:</strong> ${item.jenis_reklame}</p>
-                    <p class="mb-2 small"><strong>Lokasi:</strong> ${item.lokasi_pemasangan}</p>
-                    <p class="mb-2 small"><strong>Status:</strong> <span class="badge" style="background-color: ${statusColor};">${item.status}</span></p>
+                <div style="min-width: 280px; max-width: 380px;">
+                    <h6 class="mb-2">${escapeHtml(item.nomor_registrasi)}</h6>
+                    ${buildFotoReklameBlock(item)}
+                    <p class="mb-2 small"><strong>Pemohon:</strong> ${escapeHtml(item.nama_pemohon)}</p>
+                    <p class="mb-2 small"><strong>Jenis:</strong> ${escapeHtml(item.jenis_reklame)}</p>
+                    <p class="mb-2 small"><strong>Lokasi:</strong> ${escapeHtml(item.lokasi_pemasangan)}</p>
+                    <p class="mb-2 small"><strong>Status Approval:</strong> ${escapeHtml(item.status_approval_label)}</p>
+                    <p class="mb-2 small"><strong>Status Peta:</strong> <span class="badge" style="background-color: ${statusColor};">${getMarkerLabel(item)}</span></p>
+                    <p class="mb-2 small"><strong>Tanggal Berakhir:</strong> ${formatTanggalIndonesia(item.tanggal_berakhir)}</p>
                     <p class="mb-0 small"><strong>Koordinat:</strong> ${item.latitude.toFixed(6)}, ${item.longitude.toFixed(6)}</p>
-                    <a href="${item.url}" class="btn btn-sm btn-primary mt-2" target="_blank">Lihat Detail</a>
+                    <a href="${String(item.url).replace(/"/g, '&quot;')}" class="btn btn-sm btn-primary popup-detail-btn mt-2" target="_blank" rel="noopener">Lihat Detail</a>
                 </div>
             `;
 
-            marker.bindPopup(popup);
+            marker.bindPopup(popup, { maxWidth: 400, minWidth: 280 });
             marker.on('click', function() {
                 this.openPopup();
             });
@@ -178,18 +252,5 @@
         }
     }
 
-    // Function to get color based on status
-    function getStatusColor(status) {
-        const colors = {
-            'Draft': '#6c757d',
-            'Diajukan': '#0d6efd',
-            'Diverifikasi Operator': '#0d6efd',
-            'Ditolak Operator': '#dc3545',
-            'Ditolak Kepala Seksi': '#dc3545',
-            'Disetujui Kepala Seksi': '#0d6efd',
-            'Disetujui Kepala Bidang': '#198754',
-        };
-        return colors[status] || '#999';
-    }
 </script>
 @endpush

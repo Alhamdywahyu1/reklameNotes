@@ -24,6 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'otp_code',
         'otp_expires_at',
+        'otp_attempts',
+        'last_otp_sent_at',
         'name',
         'email',
         'password',
@@ -58,6 +60,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'otp_expires_at' => 'datetime',
+            'last_otp_sent_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
             'is_active' => 'boolean',

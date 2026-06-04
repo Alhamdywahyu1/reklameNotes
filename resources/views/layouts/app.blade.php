@@ -460,6 +460,28 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .navbar {
+                z-index: 1050;
+            }
+
+            .navbar-toggler {
+                position: relative;
+                z-index: 1051;
+                border-color: rgba(255, 255, 255, 0.35);
+            }
+
+            .navbar-collapse {
+                margin-top: 0.75rem;
+                padding: 0.75rem 1rem;
+                background: linear-gradient(135deg, #075985 0%, #0369a1 100%);
+                border-radius: 0 0 1rem 1rem;
+                box-shadow: var(--shadow-sm);
+            }
+
+            .navbar-collapse .nav-link {
+                margin: 0.25rem 0;
+            }
+
             .sidebar {
                 position: fixed;
                 left: -260px;
@@ -607,6 +629,13 @@
         .store-buttons img:hover {
             transform: scale(1.05);
         }
+
+        @media (min-width: 992px) {
+            .navbar-expand-lg .navbar-collapse {
+                display: flex !important;
+                flex-basis: auto;
+            }
+        }
     </style>
     <link rel="stylesheet" href="{{ asset('css/modern-dashboard.css') }}">
     @stack('styles')
@@ -623,23 +652,43 @@
                     <img src="{{ asset('logo_bangkalan.png') }}" alt="Logo Bangkalan" style="height: 40px; border-radius: 6px;">
                     <span>DPMPTSP</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" id="navbarToggler" type="button" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
+                        <!-- Combined User Dropdown -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle"></i> {{ auth()->user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                                @if(auth()->user()->hasRole('operator'))
-                                <li><a class="dropdown-item" href="{{ route('profile.login-history') }}"><i class="bi bi-clock-history"></i> Riwayat Login</a></li>
+                                <li><span class="dropdown-header text-uppercase small text-muted">Info Akun</span></li>
+                                <li><span class="dropdown-item-text text-muted"><i class="bi bi-envelope"></i> {{ auth()->user()->email }}</span></li>
+                                <li><span class="dropdown-item-text text-muted"><i class="bi bi-person-badge"></i> {{ auth()->user()->role?->name ?? 'User' }}</span></li>
+                                <li><hr class="dropdown-divider"></li>
+
+                                <!-- Verification Status (only shown when OTP verification enabled) -->
+                                @if(env('OTP_VERIFICATION_ENABLED', true))
+                                    @if(auth()->user()->hasVerifiedEmail())
+                                        <li><span class="dropdown-item-text text-success"><i class="bi bi-check-circle"></i> Email Terverifikasi</span></li>
+                                    @else
+                                        <li><span class="dropdown-item-text text-warning"><i class="bi bi-exclamation-circle"></i> Email Belum Terverifikasi</span></li>
+                                        <li><a class="dropdown-item" href="{{ route('otp.show') }}"><i class="bi bi-shield-check"></i> Verifikasi Email</a></li>
+                                    @endif
                                 @endif
                                 <li><hr class="dropdown-divider"></li>
+
+                                <!-- Navigation Items -->
+                                <li><a class="dropdown-item" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item @if(request()->routeIs('profile.edit')) active @endif" href="{{ route('profile.edit') }}"><i class="bi bi-person-gear"></i> Pengaturan Akun</a></li>
+                                @if(auth()->user()->hasRole('operator'))
+                                    <li><a class="dropdown-item" href="{{ route('profile.login-history') }}"><i class="bi bi-clock-history"></i> Riwayat Login</a></li>
+                                @endif
+
+                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="w-100">
+                                    <form action="{{ route('logout', [], false) }}" method="POST" class="w-100">
                                         @csrf
                                         <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Logout</button>
                                     </form>
@@ -694,6 +743,13 @@
                                     <i class="bi bi-check2-circle"></i> <span class="nav-text">Approval</span>
                                 </a>
                             </li>
+                            @if (auth()->user()->hasRole('operator'))
+                                <li class="nav-item">
+                                    <a class="nav-link @if(request()->routeIs('print.ready')) active @endif" href="{{ route('print.ready') }}">
+                                        <i class="bi bi-printer"></i> <span class="nav-text">Siap Cetak</span>
+                                    </a>
+                                </li>
+                            @endif
                             @if (auth()->user()->hasAnyRole(['kepala_seksi', 'kepala_bidang']))
                                 <li class="nav-item">
                                     <a class="nav-link @if(request()->routeIs('approval.revisi')) active @endif" href="{{ route('approval.revisi') }}">
@@ -708,6 +764,14 @@
                             </li>
                         @endif
 
+                        @if (auth()->user()->hasRole('satpol_pp'))
+                            <li class="nav-item">
+                                <a class="nav-link @if(request()->routeIs('satpol-pp.map')) active @endif" href="{{ route('satpol-pp.map') }}">
+                                    <i class="bi bi-shield-check"></i> <span class="nav-text">Peta Satpol PP</span>
+                                </a>
+                            </li>
+                        @endif
+
                         @if (auth()->user()->hasRole('admin'))
                             <div class="sidebar-section-title mt-4">Administrasi</div>
                             <li class="nav-item">
@@ -717,7 +781,7 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link @if(request()->routeIs('admin.reports.*')) active @endif" href="{{ route('admin.reports.index') }}">
-                                    <i class="bi bi-file-earmark-bars"></i> <span class="nav-text">Laporan</span>
+                                    <i class="bi bi-file-earmark-bar-graph"></i> <span class="nav-text">Laporan & Export</span>
                                 </a>
                             </li>
                         @endif
@@ -763,16 +827,15 @@
                         <span class="fs-4 fw-bold text-white" style="letter-spacing: -0.5px;">DPMPTSP</span>
                     </div>
                     <p class="mb-2" style="font-size: 1rem; color: rgba(255,255,255,0.85);">Dapatkan "Info Pendaftaran Reklame" terbaru hanya di Sistem Kami.</p>
-                    <p class="mb-0 fw-medium text-white">Mau "Daftar Reklame Mudah"?</p>
-                    
-                    <!-- Tombol Download -->
-                    <div class="store-buttons mt-3 row">
-                        <div class="col-auto">
-                            <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_ENs.svg/320px-Google_Play_Store_badge_ENs.svg.png" style="height: 38px; width: auto;" alt="Google Play"></a>
-                        </div>
-                        <div class="col-auto">
-                            <a href="#"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Download_on_the_App_Store_Badge.svg/320px-Download_on_the_App_Store_Badge.svg.png" style="height: 38px; width: auto;" alt="App Store"></a>
-                        </div>
+                    <div class="footer-contact-item mt-3">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <span>Jl. Halim Perdana Kusuma, Area Sawah, Mlajah, Kec. Bangkalan, Kabupaten Bangkalan, Jawa Timur 69116 Lantai 3</span>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="bi bi-map"></i>
+                        <a href="https://www.google.com/maps/place/Bangkalan+Plaza/@-7.0496992,112.7418072,17.55z/data=!4m14!1m7!3m6!1s0x2dd805889ff39afb:0x67952930a7b6dfd2!2sDinas+Penanaman+Modal+Dan+Pelayanan+Terpadu+Satu+Pintu!8m2!3d-7.0286379!4d112.7510397!16s%2Fg%2F11c6dznjsm!3m5!1s0x2dd805be888eab6b:0xd3d641ad912f7db2!8m2!3d-7.0504309!4d112.7437474!16s%2Fg%2F11bt_gqgzr?entry=ttu&g_ep=EgoyMDI2MDYwMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" style="color: rgba(255,255,255,0.85); text-decoration: underline;">
+                            LINK MAPS DPMPTSP
+                        </a>
                     </div>
                 </div>
 
@@ -829,7 +892,18 @@
         document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('toggleSidebarBtn');
             const mobileBtn = document.getElementById('mobileSidebarBtn');
+            const navbarToggler = document.getElementById('navbarToggler');
+            const navbarCollapse = document.getElementById('navbarNav');
+            const userDropdownToggle = document.getElementById('userDropdown');
+            const userDropdownMenu = userDropdownToggle?.parentElement?.querySelector('.dropdown-menu');
             const sidebar = document.getElementById('mainSidebar');
+
+            if (navbarToggler && navbarCollapse) {
+                navbarToggler.addEventListener('click', function () {
+                    const isOpen = navbarCollapse.classList.toggle('show');
+                    navbarToggler.setAttribute('aria-expanded', String(isOpen));
+                });
+            }
 
             if (sidebar) {
                 const toggleSidebar = function () {
@@ -850,6 +924,7 @@
                     mobileBtn.addEventListener('click', mobileToggleSidebar);
                 }
             }
+
         });
     </script>
     

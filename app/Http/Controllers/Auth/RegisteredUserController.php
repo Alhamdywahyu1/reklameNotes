@@ -57,6 +57,8 @@ class RegisteredUserController extends Controller
         $user->forceFill([
             'otp_code' => $otp,
             'otp_expires_at' => now()->addMinutes(10),
+            'otp_attempts' => 0,
+            'last_otp_sent_at' => now(),
         ])->save();
 
         Mail::to($user->email)->send(new OtpVerificationMail($otp, $user->name));

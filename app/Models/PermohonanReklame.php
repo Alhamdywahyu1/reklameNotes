@@ -45,8 +45,11 @@ class PermohonanReklame extends Model
         'status',
         'keterangan_penolakan',
         'reminder_sent_at',
+        'expiry_reminder_sent_at',
+        'expiry_reminder_h3_sent_at',
         'tanggal_berlaku',
         'tanggal_berakhir',
+        'tanggal_terbit',
         'status_kedaluwarsa',
         'rejected_by_role_id',
         'rejected_by_user_id',
@@ -59,9 +62,12 @@ class PermohonanReklame extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
+            'expiry_reminder_sent_at' => 'datetime',
+            'expiry_reminder_h3_sent_at' => 'datetime',
             'tanggal_berlaku' => 'date',
             'tanggal_berakhir' => 'date',
             'masa_berlaku' => 'date',
+            'tanggal_terbit' => 'datetime',
         ];
     }
 
@@ -163,6 +169,7 @@ class PermohonanReklame extends Model
             'Ditolak Operator', 'Ditolak Kepala Seksi', 'Ditolak Kepala Bidang' => 'danger',
             'Disetujui Kepala Seksi' => 'info',
             'Disetujui Kepala Bidang' => 'success',
+            'Sudah Terbit' => 'success',
             default => 'light',
         };
     }
@@ -249,6 +256,16 @@ class PermohonanReklame extends Model
     public function isPrintable(): bool
     {
         return $this->status === 'Disetujui Kepala Bidang';
+    }
+
+    public function isKedaluwarsa(): bool
+    {
+        return $this->getStatusKedaluarsa() === 'Kedaluwarsa';
+    }
+
+    public function canBeDeletedByOperator(): bool
+    {
+        return $this->status === 'Disetujui Kepala Bidang' && $this->isKedaluwarsa();
     }
 
     public function getStatusKedaluarsa(): string

@@ -11,9 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Di balik nginx/Apache/load balancer: agar HTTPS terdeteksi benar, cookie sesi konsisten,
+        // dan validasi CSRF (419) tidak gagal karena sesi hilang antar request.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+            'verify_email' => \App\Http\Middleware\VerifyEmail::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

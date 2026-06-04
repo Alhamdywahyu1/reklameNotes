@@ -50,6 +50,9 @@ class PersyaratanDokumen extends Model
         'Gambar konstruksi bidang',
     ];
 
+    /** Jenis persyaratan untuk foto/visualisasi reklame di peta & popup */
+    public const JENIS_FOTO_KONDISI_REKLAME = 'Foto kondisi & visualisasi reklame';
+
     public const PERSYARATAN_OPTIONAL = [
         'Surat Kuasa',
     ];

@@ -17,7 +17,8 @@ class CreateNotificationSuratDiprint implements ShouldQueue
     {
         try {
             $permohonan = $event->permohonan;
-            $operator = auth()->user();
+            // In queued listeners, auth() may not be available — resolve operator by id
+            $operator = \App\Models\User::find($event->operatorId);
 
             // Create notification for pemohon
             Notification::create([
@@ -30,18 +31,28 @@ class CreateNotificationSuratDiprint implements ShouldQueue
 
             // Send email to pemohon
             Mail::to($permohonan->user->email)->send(
-                new SuratDiprintMail($permohonan, $operator->name)
+                new SuratDiprintMail($permohonan, $operator?->name ?? 'Operator')
             );
+
+            // Update permohonan status to mark as published/terbit and store timestamp
+            try {
+                $permohonan->update([
+                    'status' => 'Sudah Terbit',
+                    'tanggal_terbit' => now(),
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Gagal memperbarui status permohonan menjadi Sudah Terbit: ' . $e->getMessage());
+            }
 
             // Log activity
             \App\Models\ActivityLog::create([
-                'user_id' => $operator->id,
+                'user_id' => $operator?->id ?? $event->operatorId,
                 'action' => 'PRINT_SURAT',
                 'model_type' => 'PermohonanReklame',
                 'model_id' => $permohonan->id,
                 'description' => "Mencetak surat persetujuan {$permohonan->nomor_registrasi}",
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
+                'ip_address' => request()?->ip() ?? null,
+                'user_agent' => request()?->userAgent() ?? null,
             ]);
         } catch (\Exception $e) {
             \Log::error('Gagal mengirim notifikasi surat diprint: ' . $e->getMessage());

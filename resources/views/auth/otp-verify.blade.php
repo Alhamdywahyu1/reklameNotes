@@ -158,10 +158,20 @@
                 <div class="alert-error">❌ {{ $errors->first('otp') }}</div>
             @endif
 
+            @if($errors->has('resend'))
+                <div class="alert-error">⏳ {{ $errors->first('resend') }}</div>
+            @endif
+
             <div class="otp-email-hint">
                 Kode dikirim ke email:<br>
                 <strong>{{ Str::mask(auth()->user()->email, '*', 3, strlen(auth()->user()->email) - 7) }}</strong>
             </div>
+
+            @if(auth()->user()->otp_attempts > 0)
+                <div style="text-align: center; color: #f97316; font-size: 0.875rem; margin-bottom: 1rem; padding: 0.75rem; background: #fffbeb; border-radius: 6px; border-left: 3px solid #f97316;">
+                    Sisa percobaan: <strong>{{ 5 - auth()->user()->otp_attempts }}/5</strong>
+                </div>
+            @endif
 
             <form method="POST" action="{{ route('otp.verify') }}" id="otpForm">
                 @csrf
@@ -184,18 +194,19 @@
 
             <div class="resend-section">
                 Tidak menerima kode?
-                <form method="POST" action="{{ route('otp.resend') }}">
+                <form method="POST" action="{{ route('otp.resend') }}" id="resendForm">
                     @csrf
-                    <button type="submit">Kirim Ulang OTP</button>
+                    <button type="submit" id="resendBtn">Kirim Ulang OTP</button>
                 </form>
+                <div id="resendCooldown" style="color: #f97316; font-weight: 600;"></div>
             </div>
         </div>
 
         <div class="otp-footer">
             Kode berlaku 10 menit &nbsp;|&nbsp;
-            <a href="{{ route('logout') }}" style="color:#0284c7;"
+            <a href="{{ route('logout', [], false) }}" style="color:#0284c7;"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
+            <form id="logout-form" action="{{ route('logout', [], false) }}" method="POST" style="display:none;">@csrf</form>
         </div>
     </div>
 </div>
@@ -204,6 +215,9 @@
     const digits = document.querySelectorAll('.otp-digit');
     const hidden  = document.getElementById('otpHidden');
     const submit  = document.getElementById('submitBtn');
+    const resendBtn = document.getElementById('resendBtn');
+    const resendForm = document.getElementById('resendForm');
+    const resendCooldown = document.getElementById('resendCooldown');
 
     digits.forEach((input, index) => {
         input.addEventListener('input', (e) => {
@@ -243,5 +257,45 @@
 
     // Auto-focus first input
     digits[0].focus();
+
+    // Cooldown timer untuk resend
+    const lastOtpSent = new Date({{ auth()->user()->last_otp_sent_at ? '"' . auth()->user()->last_otp_sent_at->toIso8601String() . '"' : 'null' }});
+    
+    function updateResendCooldown() {
+        if (!lastOtpSent || lastOtpSent === 'null') {
+            resendBtn.disabled = false;
+            resendBtn.style.cursor = 'pointer';
+            resendCooldown.textContent = '';
+            return;
+        }
+
+        const now = new Date();
+        const secondsElapsed = Math.floor((now - lastOtpSent) / 1000);
+        const secondsRemaining = Math.max(0, 60 - secondsElapsed);
+
+        if (secondsRemaining > 0) {
+            resendBtn.disabled = true;
+            resendBtn.style.cursor = 'not-allowed';
+            resendBtn.style.opacity = '0.5';
+            resendCooldown.textContent = `Tunggu ${secondsRemaining}s...`;
+        } else {
+            resendBtn.disabled = false;
+            resendBtn.style.cursor = 'pointer';
+            resendBtn.style.opacity = '1';
+            resendCooldown.textContent = '';
+        }
+    }
+
+    // Update cooldown setiap detik
+    updateResendCooldown();
+    setInterval(updateResendCooldown, 1000);
+
+    // Prevent form submission jika dalam cooldown
+    resendForm.addEventListener('submit', (e) => {
+        if (resendBtn.disabled) {
+            e.preventDefault();
+            return false;
+        }
+    });
 </script>
 @endsection

@@ -10,7 +10,7 @@
             <p class="text-muted">Kelola approval final permohonan reklame</p>
         </div>
         <div>
-            <a href="{{ route('dashboard.reklame-chart') }}" class="btn btn-primary">
+            <a href="{{ route('dashboard.reklame-chart', [], false) }}" class="btn btn-primary">
                 <i class="bi bi-bar-chart"></i> Lihat Analytics
             </a>
         </div>
@@ -89,8 +89,8 @@
                                 <td>{{ Str::limit($item->lokasi_pemasangan, 25) }}</td>
                                 <td>{{ $item->created_at->format('d M Y') }}</td>
                                 <td>
-                                    <a href="{{ route('approval.verify', $item) }}" class="btn btn-info btn-sm" title="Verifikasi Dokumen">
-                                        <i class="bi bi-file-earmark-check"></i> Verifikasi
+                                    <a href="{{ route('approval.approve-bidang', $item) }}" class="btn btn-info btn-sm" title="Approval Final Kepala Bidang">
+                                        <i class="bi bi-check2-square"></i> Approval Bidang
                                     </a>
                                 </td>
                             </tr>

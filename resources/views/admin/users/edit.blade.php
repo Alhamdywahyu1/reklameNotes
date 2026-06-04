@@ -66,6 +66,7 @@
                         @error('role_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <small class="text-muted d-block mt-2">Jika diubah ke <strong>Satpol PP</strong>, user akan diarahkan ke peta pengawasan reklame saat login.</small>
                     </div>
 
                     @if ($user->id !== 1)
@@ -117,7 +118,30 @@
                             <span class="badge bg-danger">Tidak Aktif</span>
                         @endif
                     </dd>
+
+                    <dt class="col-6">Role Saat Ini:</dt>
+                    <dd class="col-6">
+                        @php
+                            $roleSlug = $user->role?->slug;
+                            $badgeClass = match ($roleSlug) {
+                                'pemohon' => 'bg-secondary',
+                                'operator' => 'bg-primary',
+                                'kepala_seksi' => 'bg-info text-dark',
+                                'kepala_bidang' => 'bg-success',
+                                'satpol_pp' => 'bg-danger',
+                                'admin' => 'bg-dark',
+                                default => 'bg-secondary',
+                            };
+                        @endphp
+                        <span class="badge {{ $badgeClass }}">{{ $user->role?->name ?? 'No Role' }}</span>
+                    </dd>
                 </dl>
+
+                @if ($user->role?->slug === 'satpol_pp')
+                    <div class="alert alert-danger mb-0 mt-3">
+                        <i class="bi bi-shield-check"></i> User ini difokuskan untuk pengawasan lapangan melalui halaman peta Satpol PP.
+                    </div>
+                @endif
             </div>
         </div>
     </div>

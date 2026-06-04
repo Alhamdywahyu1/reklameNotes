@@ -202,6 +202,24 @@
 
                             <!-- Keputusan Section (Moved from separate tab) -->
                             <hr class="my-4">
+                            <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-calendar-event"></i> Masa Berlaku Surat</h5>
+
+                            <p class="small text-muted mb-3">Operator wajib mengatur masa berlaku jika memilih Disetujui.</p>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tanggal_berlaku" class="form-label">Tanggal Berlaku <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="tanggal_berlaku" name="tanggal_berlaku" value="{{ old('tanggal_berlaku', optional($permohonan->tanggal_berlaku)->toDateString()) }}">
+                                    <small class="text-danger d-none" id="tanggalBerlakuError">Tanggal berlaku wajib diisi jika Disetujui</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="tanggal_berakhir" class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="tanggal_berakhir" name="tanggal_berakhir" value="{{ old('tanggal_berakhir', optional($permohonan->tanggal_berakhir)->toDateString()) }}">
+                                    <small class="text-danger d-none" id="tanggalBerakhirError">Tanggal berakhir wajib diisi dan harus setelah tanggal berlaku</small>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
                             <h5 class="mb-3" style="color: #1a5490;"><i class="bi bi-pencil-square"></i> Keputusan Verifikasi</h5>
 
                             <div class="mb-3">
@@ -325,9 +343,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
     const keputusanRadios = document.querySelectorAll('input[name="keputusan"]');
     const keteranganField = document.getElementById('keterangan');
+    const tanggalBerlakuField = document.getElementById('tanggal_berlaku');
+    const tanggalBerakhirField = document.getElementById('tanggal_berakhir');
     const keteranganRequired = document.getElementById('keteranganRequired');
     const keteranganError = document.getElementById('keteranganError');
     const keputusanError = document.getElementById('keputusanError');
+    const tanggalBerlakuError = document.getElementById('tanggalBerlakuError');
+    const tanggalBerakhirError = document.getElementById('tanggalBerakhirError');
     const autoSaveIndicator = document.getElementById('autoSaveIndicator');
     const permohonanId = {{ $permohonan->id }};
 
@@ -383,11 +405,25 @@ document.addEventListener('DOMContentLoaded', function() {
         validateForm();
     });
 
+    tanggalBerlakuField.addEventListener('change', function() {
+        validateForm();
+    });
+
+    tanggalBerakhirField.addEventListener('change', function() {
+        validateForm();
+    });
+
     // Form validation
     function validateForm() {
         const keputusanSelected = Array.from(keputusanRadios).some(radio => radio.checked);
         const ditolakSelected = document.getElementById('ditolak').checked;
+        const disetujuiSelected = document.getElementById('disetujui').checked;
         const keteranganFilled = keteranganField.value.trim() !== '';
+        const tanggalBerlakuFilled = tanggalBerlakuField.value !== '';
+        const tanggalBerakhirFilled = tanggalBerakhirField.value !== '';
+        const tanggalValid = tanggalBerlakuFilled && tanggalBerakhirFilled
+            ? new Date(tanggalBerakhirField.value) > new Date(tanggalBerlakuField.value)
+            : false;
 
         let isValid = keputusanSelected;
 
@@ -404,6 +440,20 @@ document.addEventListener('DOMContentLoaded', function() {
             keputusanError.classList.add('d-none');
         }
 
+        if (disetujuiSelected && !tanggalBerlakuFilled) {
+            isValid = false;
+            tanggalBerlakuError.classList.remove('d-none');
+        } else {
+            tanggalBerlakuError.classList.add('d-none');
+        }
+
+        if (disetujuiSelected && !tanggalValid) {
+            isValid = false;
+            tanggalBerakhirError.classList.remove('d-none');
+        } else {
+            tanggalBerakhirError.classList.add('d-none');
+        }
+
         submitBtn.disabled = !isValid;
     }
 
@@ -413,7 +463,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const keputusanSelected = Array.from(keputusanRadios).some(radio => radio.checked);
         const ditolakSelected = document.getElementById('ditolak').checked;
+        const disetujuiSelected = document.getElementById('disetujui').checked;
         const keteranganFilled = keteranganField.value.trim() !== '';
+        const tanggalBerlakuFilled = tanggalBerlakuField.value !== '';
+        const tanggalBerakhirFilled = tanggalBerakhirField.value !== '';
+        const tanggalValid = tanggalBerlakuFilled && tanggalBerakhirFilled
+            ? new Date(tanggalBerakhirField.value) > new Date(tanggalBerlakuField.value)
+            : false;
 
         if (!keputusanSelected) {
             keputusanError.classList.remove('d-none');
@@ -422,6 +478,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (ditolakSelected && !keteranganFilled) {
             keteranganError.classList.remove('d-none');
+            return;
+        }
+
+        if (disetujuiSelected && (!tanggalBerlakuFilled || !tanggalValid)) {
+            validateForm();
             return;
         }
 

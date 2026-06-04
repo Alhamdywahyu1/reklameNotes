@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="header-page">
-    <h1><i class="bi bi-person-plus"></i> Tambah User Baru</h1>
-    <p class="text-muted">Buat akun pengguna baru untuk sistem</p>
+    <h1><i class="bi bi-person-plus"></i> Tambah Akun Petugas</h1>
+    <p class="text-muted">Buat akun baru untuk petugas sistem</p>
 </div>
 
 <div class="row">
@@ -66,6 +66,7 @@
                         @error('role_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
+                        <small class="text-muted d-block mt-2">Pilih <strong>Satpol PP</strong> untuk user yang hanya bertugas memantau reklame di lapangan melalui peta pengawasan.</small>
                     </div>
 
                     <div class="mb-3">
@@ -93,14 +94,18 @@
     <div class="col-md-4">
         <div class="card bg-light">
             <div class="card-body">
-                <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi</h6>
+                <h6 class="card-title"><i class="bi bi-info-circle"></i> Informasi Role Petugas</h6>
                 <ul class="list-unstyled small text-muted">
-                    <li><strong>Pemohon:</strong> User yang mengajukan permohonan</li>
-                    <li><strong>Operator:</strong> Verifikasi permohonan tahap pertama</li>
-                    <li><strong>Kepala Seksi:</strong> Approval tahap kedua</li>
-                    <li><strong>Kepala Bidang:</strong> Final approval</li>
-                    <li><strong>Admin:</strong> Akses penuh sistem</li>
+                    <li><span class="badge bg-primary me-1">Operator</span> Verifikasi permohonan tahap pertama</li>
+                    <li class="mt-2"><span class="badge bg-info text-dark me-1">Kepala Seksi</span> Approval tahap kedua</li>
+                    <li class="mt-2"><span class="badge bg-success me-1">Kepala Bidang</span> Final approval</li>
+                    <li class="mt-2"><span class="badge bg-danger me-1">Satpol PP</span> Pemantauan reklame lapangan melalui peta pengawasan</li>
                 </ul>
+                <hr>
+                <div class="small text-muted">
+                    <i class="bi bi-exclamation-circle text-warning"></i>
+                    <strong>Catatan:</strong> Akun pemohon (pengguna umum) tidak dapat dibuat di sini. Pemohon mendaftar sendiri melalui halaman registrasi.
+                </div>
             </div>
         </div>
     </div>
